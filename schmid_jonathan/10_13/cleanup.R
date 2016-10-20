@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-source('first_steps.R')
+source('j_ch02.R')
 
 # -----------------------------------------------------------
 # Regular expressions for ending up with just the Arabic text

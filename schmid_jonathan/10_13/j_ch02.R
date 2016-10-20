@@ -1,12 +1,15 @@
 #!/usr/bin/env Rscript
 
-setwd('~/Desktop/Text Analysis/Corpus/up0600AH') # Path on my system only!
-file <- '0303Nasai.Tabaqat.JK000831-ara1' # The smallest file of the bunch. Should work on all Unices.
+# Relative to homework repo root.
+dir  <- '../../corpus/up0600AH'
+# The smallest file of the bunch. Should work on all Unices.
+file <- file.path(dir, '0303Nasai.Tabaqat.JK000831-ara1')
 
 # ------------------------------------------------------
 # Code from Jockers, chapter 2 which I found interesting
 # ------------------------------------------------------
 
+message(paste('Opened', file))
 text.v <- scan(file, what='character', sep='\n')
 
 # It would actually be a little nicer to just look up the
