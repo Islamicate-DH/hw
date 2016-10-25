@@ -1,0 +1,20 @@
+> setwd("~/Downloads/TextAnalysisWithR/TextAnalysisWithR")
+> text.v <- scan("data/plaintext/melville.txt", what="character", sep="\n")
+Read 18874 items
+> 
+> start.v <- which(text.v == "CHAPTER 1. Loomings.")
+> end.v <- which(text.v == "orphan.")
+> novel.lines.v <- text.v[start.v:end.v]
+> novel.v <- paste(novel.lines.v, collapse=" ")
+> novel.lower.v <- tolower(novel.v)
+> moby.words.1 <- strsplit(novel.lower.v, "\\W")
+> moby.word.v <- unlist(moby.words.1)
+> not.blanks.v <- which(moby.word.v!="")
+> moby.word.v <- moby.word.v[not.blanks.v]
+> moby.freqts.t <- table(moby.word.v)
+> sorted.moby.freqs.t <- sort(moby.freqts.t, decreasing=TRUE)
+> sorted.moby.freqs.t[1:10]
+moby.word.v
+  the    of   and     a    to    in  that    it   his     i 
+14175  6469  6325  4636  4539  4077  3045  2497  2495  2114 
+> plot(sorted.moby.freqs.t[1:10])
