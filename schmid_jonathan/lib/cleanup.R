@@ -14,4 +14,4 @@ cleanArabicString <- function(string) {
       ), perl = TRUE
     )
   )
-)
+}
