@@ -42,5 +42,5 @@ pp <- pp + geom_bar(stat = 'identity')                              +
 
 # pp # When in interactive mode…
 # When running through shellggsave('~/Desktop/Text Analysis/Homework/jonathan|rapha/jockers/ch02/frequency.pdf', width=30, height=20, units='cm', device=cairo_pdf)
-ggsave('~/Desktop/Text Analysis/Homework/jonathan|rapha/jockers/ch02/frequency.pdf', 
+ggsave('frequency.pdf', 
        width=30, height=20, units='cm', device=cairo_pdf) # Roughly A4 sized
