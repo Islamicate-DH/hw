@@ -1,3 +1,6 @@
 [submodule "corpus"]
 	path = corpus
-	url = git@github.com:sixtyfive/arabicCorpus.git
+  url = git@github.com:Islamicate-DH/arabicCorpus.git
+[submodule "wenzel_tobias_arabiccorpus"]
+  path = wenzel_tobias/arabicCorpus
+  url = git@github.com:Islamicate-DH/arabicCorpus.git
