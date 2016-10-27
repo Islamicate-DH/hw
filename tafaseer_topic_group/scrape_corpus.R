@@ -54,24 +54,33 @@ download_all_tafaseer <- function(url, pos = c(1,1,1,1))
           raw_html = read_html(url)
           n = extract_number_of_pages(raw_html)
           text.meta = extract_meta(raw_html) # Returns vector: 1=title,2=author,3=year
-          text.ayah   = extract_ayah(raw_html)
-          text.tafsir = extract_tafsir(raw_html)
+          text.ayah   = paste('<article class="ayah">', extract_ayah(raw_html), '</article>', sep='')
+          text.tafsir = paste('<article class="tafsir"><p>', extract_tafsir(raw_html), '</p>', sep='')
           # Pages 2-n
           if (n > 1) {
             for (page in 2:n) {
               url = param_set(url, 'Page', page)
               message('\t(Page ', page, ')')
               raw_html = read_html(url)
-              text.tafsir = paste(text.tafsir, '\\n\\n', extract_tafsir(raw_html))
+              text.tafsir = paste(text.tafsir, '<p>', extract_tafsir(raw_html), '</p>', sep='')
             }
           }
+          text.tafsir = paste(text.tafsir, '</article>', sep='')
           message('\tComplete. Around ', str_count(text.tafsir, '\\S+'), ' words pasted.')
           save_to_disk(c(madrasa, tafsir, sura, ayah), text.meta, text.ayah, text.tafsir)
           url = param_set(url, 'Page', 1) # Reset page number!
+          sleep(1) # Sleep up to 1 second so we're not seen as a threat.
         }
       } 
     } 
   }
+}
+
+sleep <- function(s)
+{
+  t0 = proc.time()
+  Sys.sleep(s)
+  proc.time() - t0
 }
 
 save_to_disk <- function(pos, meta, ayah, tafsir)
@@ -148,7 +157,7 @@ extract_ayah <- function(raw_html)
     html_nodes('#AyahText .TextAyah') %>%
     html_text()
   message('\tAyah: ', ayah)
-  return(ayah)
+  return(trimws(ayah))
 }
 
 extract_tafsir <- function(raw_html)
@@ -159,7 +168,7 @@ extract_tafsir <- function(raw_html)
   tafsir = paste(tafsir, collapse=' ')
   message('\tTafsir: ', paste(strtrim(tafsir, 35), 
           '… (~', str_count(tafsir, '\\S+'), 'words total)'))
-  return(tafsir)
+  return(trimws(tafsir))
 }
 
 # Let's rock'n'roll!
