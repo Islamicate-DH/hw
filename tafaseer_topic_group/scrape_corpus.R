@@ -1,4 +1,5 @@
 #!/usr/bin/env Rscript
+# Only runs on R >= 3.3.1!
 # Requires: urltools, rvest, XML, magrittr, stringr
 
 for (lib in c('urltools', 'rvest', 'stringr')) {
@@ -15,17 +16,28 @@ number_of_suwwar  = 114
 number_of_tafaseer_per_madrasa = c(8, 20, 10, 2, 7, 7, 4, 3, 5, 2) 
 number_of_ayaat_per_sura       = c(7, 286, 200, 176, 120, 165, 206, 75, 129, 109, 123, 111, 43, 52, 99, 128, 111, 110, 98, 135, 112, 78, 118, 64, 77, 227, 93, 88, 69, 60, 34, 30, 73, 54, 45, 83, 182, 88, 75, 85, 54, 53, 89, 59, 37, 35, 38, 29, 18, 45, 60, 49, 62, 55, 78, 96, 29, 22, 24, 13, 14, 11, 11, 18, 12, 12, 30, 52, 52, 44, 28, 28, 20, 56, 40, 31, 50, 40, 46, 42, 29, 19, 36, 25, 22, 17, 19, 26, 30, 20, 15, 21, 11, 8, 8, 19, 5, 8, 8, 11, 11, 8, 3, 9, 5, 4, 7, 3, 6, 3, 5, 4, 5, 6)
 
-download_all_tafaseer <- function(url)
+download_all_tafaseer <- function(url, pos = c(1,1,1,1))
 {
+  pos_set = FALSE
   # The mother of all nested loops. Makes Ross' and Robert's hearts cringe,
-  # but works.  It would be more R-ish to use expand.grid on the `parameters'
+  # but works. It would be more R-ish to use expand.grid on the `parameters'
   # data grid, unfortunately urltools does not seem to provide the necessary 
   # functions to do so.
+  #
   # Major thanks to Franziska for all the sweets that made this possible!
+  # Still haven't finished all the Knoppers!
+  #
+  # TODO: Look into changing this into nested while loops, which would make
+  # for more pleasant reading given the added code for returning to a saved
+  # position.
   for (madrasa in 1:number_of_madaris) {
+    if (!pos_set && madrasa < pos[1]) {next}
     for (tafsir in 1:number_of_tafaseer_per_madrasa[madrasa]) {
+      if (!pos_set && tafsir < pos[2]) {next}
       for (sura in 1:number_of_suwwar) {
+        if (!pos_set && sura < pos[3]) {next}
         for (ayah in 1:number_of_ayaat_per_sura[sura]) {
+          if (!pos_set) {if (ayah < pos[4]) {next} else {pos_set = TRUE}}
           url = param_set(url, 'tMadhNo',   madrasa)
           url = param_set(url, 'tSoraNo',   sura)
           url = param_set(url, 'tTafsirNo', tafsir)
@@ -45,7 +57,7 @@ download_all_tafaseer <- function(url)
           text.ayah   = extract_ayah(raw_html)
           text.tafsir = extract_tafsir(raw_html)
           # Pages 2-n
-          if (n > 2) {
+          if (n > 1) {
             for (page in 2:n) {
               url = param_set(url, 'Page', page)
               message('\t(Page ', page, ')')
@@ -62,20 +74,24 @@ download_all_tafaseer <- function(url)
   }
 }
 
-save_to_disk <- function(location, meta, ayah, tafsir)
+save_to_disk <- function(pos, meta, ayah, tafsir)
 {
   # Ayah text first
   path = file.path('corpus', 'altafsir.com', 'ayaat')
-  file = file.path(path, sprintf('%s:%s.txt', location[3], location[4]))
+  file = file.path(path, sprintf('%s:%s.txt', pos[3], pos[4]))
   dir.create(path, showWarnings = FALSE, recursive = TRUE)
   write(ayah, file)
   message('\tSaved ayah to ', file)
   # Now the tafseer text
   path = file.path('corpus', 'altafsir.com', 'tafaseer')
-  file = file.path(path, sprintf('%s:%s - %s (%s).txt', location[3], location[4], meta[2], meta[3]))
+  file = file.path(path, sprintf('%s:%s - %s (%s).txt', pos[3], pos[4], pos[2], pos[3]))
   dir.create(path, showWarnings = FALSE, recursive = TRUE)
   write(tafsir, file)
   message('\tSaved tafsir to ', file)
+  # Position marker so we can pick up where we left off
+  file = file.path('corpus', 'altafsir.com', 'scraper_pos.dat')
+  pos  = sprintf('%s,%s,%s,%s', pos[1], pos[2], pos[3], pos[4])
+  write(pos, file)
 }
 
 # Notes for scraping altafsir.com
@@ -116,8 +132,8 @@ extract_meta <- function(raw_html)
 {
   meta <- raw_html %>%
     html_nodes('#DispFrame .TextResultArabic') %>%
-    html_text()
-  meta = meta[1] # nth-child(1) ... not sure if that'd work...
+    html_text() %>%
+    head(1) # Meaning "nth-child(1)" - not sure if that'd work...
   regex = "\\*\\s*(?<title>.*?) ?\\/ ?(?<author>\\s?.*?)\\s?\\(\\D*(?<year>\\d{3,4}).*\\)"
   meta = unlist(regmatches(meta, regexec(regex, meta, perl=TRUE)))
   message('\tTitle: ', meta[2])
@@ -148,4 +164,10 @@ extract_tafsir <- function(raw_html)
 }
 
 # Let's rock'n'roll!
-download_all_tafaseer(default_url)
+file = file.path('corpus', 'altafsir.com', 'scraper_pos.dat')
+if (file.exists(file)) {
+  pos = unlist(read.csv(file, header=FALSE))
+  download_all_tafaseer(default_url, pos)
+} else {
+  download_all_tafaseer(default_url)
+}
