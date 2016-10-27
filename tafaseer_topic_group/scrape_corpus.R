@@ -1,7 +1,9 @@
 #!/usr/bin/env Rscript
+# Requires: urltools, rvest, XML, magrittr, stringr
 
-library(urltools)
-library(rvest)
+for (lib in c('urltools', 'rvest', 'stringr')) {
+  suppressPackageStartupMessages(library(lib, character.only = TRUE))
+}
 
 default_url = 'http://www.altafsir.com/Tafasir.asp?tMadhNo=0&tTafsirNo=0&tSoraNo=1&tAyahNo=1&tDisplay=yes&LanguageID=1'
 parameters  = param_get(default_url, c('tMadhNo', 'tTafsirNo', 'tSoraNo', 'tAyahNo'))
@@ -28,62 +30,107 @@ download_all_tafaseer <- function(url)
           url = param_set(url, 'tSoraNo',   sura)
           url = param_set(url, 'tTafsirNo', tafsir)
           url = param_set(url, 'tAyahNo',   ayah)
-          message(c('Downloading ', url))
+          message(url)
           # Page 1
           raw_html = read_html(url)
           n = extract_number_of_pages(raw_html)
-          text.author = extract_author(raw_html)
+          text.meta = extract_meta(raw_html) # Returns vector: 1=title,2=author,3=year
           text.ayah   = extract_ayah(raw_html)
-          message(c("Author: ", text.author)) # Just for debugging
-          message(c("Ayah: ", text.ayah))     # Just for debugging
-          text.tafseer = extract_tafseer(raw_html)
+          text.tafsir = extract_tafsir(raw_html)
           # Pages 2-n
           for (page in 2:n) {
             url = param_set(url, 'Page', page)
+            message('\t(Page ', page, ')')
             raw_html = read_html(url)
-            text.tafseer = paste(text.tafseer, '\\n', extract_tafseer(raw_html))
+            text.tafsir = paste(text.tafsir, '\\n\\n', extract_tafsir(raw_html))
           }
-          message(c("Tafseer: ", text.tafseer)) # Just for debugging
-          # TODO: save text to files in a sensible manner
+          message('\tComplete. Around ', str_count(text.tafsir, '\\S+'), ' words pasted.')
+          save_to_disk(c(madrasa, tafsir, sura, ayah), text.meta, text.ayah, text.tafsir)
         }
       } 
     } 
   }
 }
 
-extract_number_of_pages <- function(raw_html)
+save_to_disk <- function(location, meta, ayah, tafsir)
 {
-  # TODO: implement me! (see notes below...)
-  message("Extracting number of pages")
-  return(2)
+  # Ayah text first
+  path = file.path('corpus', 'altafsir.com', 'ayaat')
+  file = file.path(path, sprintf('%s:%s.txt', location[3], location[4]))
+  dir.create(path, showWarnings = FALSE, recursive = TRUE)
+  write(ayah, file)
+  message('\tSaved ayah to ', file)
+  # Now the tafseer text
+  path = file.path('corpus', 'altafsir.com', 'tafaseer')
+  file = file.path(path, sprintf('%s:%s - %s (%s).txt', location[3], location[4], meta[2], meta[3]))
+  dir.create(path, showWarnings = FALSE, recursive = TRUE)
+  write(tafsir, file)
+  message('\tSaved tafsir to ', file)
 }
 
-extract_author <- function(raw_html)
+# Notes for scraping altafsir.com
+# ===============================
+#
+# Inside #DispFrame, the following is true:
+#
+# * first table doesn't interest us
+#
+# * first .TextResultArabic is tafsir name and author
+#
+# * #AyahText contains ayah which the tafsir talks about
+#
+# * from the first to the last occurance of all .TextResultArabic
+#   contained within <div align='right' dir='rtl'>, that's
+#   the actual tafsir text!
+#
+# * second table (inside of which is the only <center>!), that's
+#   the list of page numbers
+
+extract_number_of_pages <- function(raw_html)
 {
-  # TODO: implement me!
-  return("Albert Einstein")
+  n <- raw_html %>%
+    html_nodes('#DispFrame center u') %>%
+    html_text() %>%
+    as.numeric()
+  n = n[length(n)]
+  message('\tNumber of pages: ', n)
+  return(n)
+}
+
+extract_meta <- function(raw_html)
+{
+  meta <- raw_html %>%
+    html_nodes('#DispFrame .TextResultArabic') %>%
+    html_text()
+  meta = meta[1] # nth-child(1) ... not sure if that'd work...
+  regex = "\\*\\s*(?<title>.*?) ?\\/ ?(?<author>\\s?.*?)\\s?\\(\\D*(?<year>\\d{3,4}).*\\)"
+  meta = unlist(regmatches(meta, regexec(regex, meta, perl=TRUE)))
+  message('\tTitle: ', meta[2])
+  message('\tAuthor: ', meta[3])
+  message('\tYear: ', meta[4])
+  return(meta[2:4])
 }
 
 extract_ayah <- function(raw_html)
 {
-  # TODO: implement me!
-  return("بسم لله الرحمن الرحيم")
+  ayah <- raw_html %>%
+    html_nodes('#AyahText .TextAyah') %>%
+    html_text()
+  message('\tAyah: ', ayah)
+  return(ayah)
 }
 
-extract_tafseer <- function(raw_html)
+extract_tafsir <- function(raw_html)
 {
-  message("Extracting text snippets")
-  # TODO: implement me!
-  #
-  # inside DispFrame id, the following is true:
-  # * first table doesn't interest us
-  # * first TextResultArabic class is tafseer name and author
-  # * AyahText id contains ayah which the tafseer talks about
-  # * from the first to the 3rd-to-last occurance of TextResultArabic
-  #   (all contained within <div align='right' dir='rtl'>!!), that's
-  #   the actual tafseer text!
-  # * second table (inside only <center>!) is list of page numbers
-  return("Lorem ipsum dolor sit amet consectetur.")
+  # TODO: Test whether the below selector truly works. I have doubts.
+  tafsir <- raw_html %>%
+    html_nodes('#SearchResults font font') %>%
+    html_text()
+  tafsir = paste(tafsir, collapse=' ')
+  message('\tTafsir: ', paste(strtrim(tafsir, 35), 
+          '… (~', str_count(tafsir, '\\S+'), 'words total)'))
+  return(tafsir)
 }
 
+# Let's rock'n'roll!
 download_all_tafaseer(default_url)
