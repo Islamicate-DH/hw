@@ -153,7 +153,6 @@ extract_ayah <- function(raw_html)
 
 extract_tafsir <- function(raw_html)
 {
-  # TODO: Test whether the below selector truly works. I have doubts.
   tafsir <- raw_html %>%
     html_nodes('#SearchResults font font') %>%
     html_text()
