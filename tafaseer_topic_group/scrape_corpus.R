@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 # Only runs on R >= 3.3.1!
-# Requires: urltools, rvest, XML, magrittr, stringr
+# Requires: install.packages(c('urltools', 'rvest', 'XML', 'magrittr', 'stringr'))
 # Remember: every line of code one liability!
 
 for (lib in c('urltools', 'rvest', 'stringr')) {
@@ -79,9 +79,9 @@ download <- function(url, sura, ayah, madrasa, tafsir, page)
   url = param_set(url, 'tAyahNo',   ayah)
   url = param_set(url, 'Page',      page)
   path = file.path('corpus', 'altafsir.com', 'raw',
-         sprintf('quran_%s,%s-school_%s-tafsir_%s',
+         sprintf('quran_%03d,%03d-school_%02d-tafsir_%02d',
          sura, ayah, madrasa, tafsir)) # Logical order
-  file = file.path(path, sprintf('page_%s.html', page))
+  file = file.path(path, sprintf('page_%02d.html', page))
   dir.create(path, showWarnings = FALSE, recursive = TRUE)
   download.file(url, file, quiet=TRUE, cacheOK=FALSE)
   message(sprintf('\tSaved page %s to %s', page, file))
