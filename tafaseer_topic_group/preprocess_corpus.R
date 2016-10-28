@@ -11,10 +11,7 @@ path.raw = file.path('..', 'corpora', 'altafsir_com')
 path.extracted = file.path('..', 'corpora', 'altafsir_com_corpus', 'extracted')
 
 read_files <- function(path.raw, path.extracted)
-{
-  files = list.files(path.raw, pattern='page*',
-                     recursive=TRUE, full.names=TRUE)
-  
+{  
   # Go through sura directories, save sura number
   #   Go through aaya directories, save aaya number
   #     Go through madhab directories, save madhab number
