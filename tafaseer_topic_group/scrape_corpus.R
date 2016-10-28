@@ -3,7 +3,7 @@
 # Requires: install.packages(c('urltools', 'rvest', 'XML', 'magrittr', 'stringr'))
 # Remember: every line of code one liability!
 
-for (lib in c('urltools', 'rvest', 'stringr')) {
+for (lib in c('urltools', 'curl', 'rvest', 'stringr')) {
   suppressPackageStartupMessages(library(lib, character.only = TRUE))
 }
 
@@ -51,7 +51,7 @@ download_all <- function(url, path, pos = c(1,1,1,1))
             sprintf('Time elapsed:\t%.0f min\n', (proc.time() - t0)[3] / 60),
             delim, '\n', url)          
           download(url, path, sura, ayah, madrasa, tafsir)
-          sleep(1) # Sleep up to 1 second so we're not seen as a threat.
+          sleep(10) # Sleep up to 1 second so we're not seen as a threat.
         }
       } 
     } 
@@ -67,33 +67,36 @@ sleep <- function(s)
 
 download <- function(url, root, sura, ayah, madrasa, tafsir)
 {
-  page = 1 # Must download the first page to learn about total number of pages
   url = param_set(url, 'tMadhNo',   madrasa)
   url = param_set(url, 'tSoraNo',   sura)
   url = param_set(url, 'tTafsirNo', tafsir)
   url = param_set(url, 'tAyahNo',   ayah)
-  url = param_set(url, 'Page',      page)
-  path = file.path(root, 
-                   sprintf('quran_%03d,%03d-school_%02d-tafsir_%02d',
-                   sura, ayah, madrasa, tafsir)) # Logical order
-  file = file.path(path, sprintf('page_%02d.html', page))
-  dir.create(path, showWarnings = FALSE, recursive = TRUE)
-  download.file(url, file, quiet=TRUE, cacheOK=FALSE)
-  message(sprintf('\tSaved page %s to %s', page, file))
-  pages = extract_number_of_pages(read_html(file))
-  if (pages > 1) {
-    for (page in 2:pages) {
-      file = file.path(path, sprintf('page_%02d.html', page))
-      download.file(url, file, quiet=TRUE, cacheOK=FALSE)
-      message(sprintf('\tSaved page %s to %s', page, file))
-    }
+
+  page = 1     # This is where we start 
+  no_pages = 1 # Might not be true, but we're assuming it for now
+  # Will succeed at least once
+  while (page <= no_pages) {
+    url = param_set(url, 'Page', page)
+    response = curl_fetch_memory(url)
+    contents = iconv(rawToChar(response$content), from='CP1256', to='UTF-8')
+    path = file.path(root, 
+                     sprintf('quran_%03d,%03d-school_%02d-tafsir_%02d',
+                     sura, ayah, madrasa, tafsir)) # Logical order
+    file = file.path(path, sprintf('page_%02d.html', page))
+    dir.create(path, showWarnings = FALSE, recursive = TRUE)
+    write(contents, file)
+    message(sprintf('\tSaved page %s to %s', page, file))
+    # Let's find out the truth!
+    if (page == 1) {
+      no_pages = extract_number_of_pages(read_html(file))}
+    # Whatever it is, the show must go on...
+    page = page + 1
   }
+
   # Position marker so we can pick up where we left off
   file = file.path(root, 'scraper_pos.dat')
   pos  = sprintf('%s,%s,%s,%s', madrasa, tafsir, sura, ayah) # Website's order
   write(pos, file)
-  # Contents are required by first caller!
-  return(file)
 }
 
 extract_number_of_pages <- function(raw_html)
