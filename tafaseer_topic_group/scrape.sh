@@ -14,3 +14,5 @@ i=0; for madhab in `seq 1 $madahib`; do
     tmux new-window -t $session:$i -n '' "Rscript altafsir_com_scraper.R --start=$madhab,$tafsir,1,1 --stop=$madhab,$tafsir,$last_sura,$last_aaya"
   done
 done
+
+tmux attach-session -t $session
