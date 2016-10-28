@@ -51,7 +51,7 @@ download_all <- function(url, path, pos = c(1,1,1,1))
             sprintf('Time elapsed:\t%.0f min\n', (proc.time() - t0)[3] / 60),
             delim, '\n', url)          
           download(url, path, sura, ayah, madrasa, tafsir)
-          sleep(10) # Sleep up to 1 second so we're not seen as a threat.
+          sleep(1) # Sleep up to 1 second so we're not seen as a threat.
         }
       } 
     } 
