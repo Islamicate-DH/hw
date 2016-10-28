@@ -1,5 +1,5 @@
 #!/usr/bin/env Rscript
-# Only runs on R >= 3.3.1!
+# Only runs on R >= 3.3.1
 # Requires: install.packages(c('urltools', 'rvest', 'XML', 'magrittr', 'stringr'))
 # Remember: every line of code one liability!
 
@@ -9,7 +9,7 @@ for (lib in c('urltools', 'curl', 'rvest', 'stringr')) {
 
 default_url = 'http://www.altafsir.com/Tafasir.asp?tMadhNo=0&tTafsirNo=0&tSoraNo=1&tAyahNo=1&tDisplay=yes&LanguageID=1'
 parameters  = param_get(default_url, c('tMadhNo', 'tTafsirNo', 'tSoraNo', 'tAyahNo'))
-save_path   = file.path('..', 'corpora', 'altafsir_com', 'raw')
+save_path   = file.path('..', '..', 'corpora', 'altafsir_com', 'raw')
 
 number_of_madaris = 10
 number_of_suwwar  = 114
