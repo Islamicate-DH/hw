@@ -7,3 +7,6 @@
 [submodule "corpora/altafsir_com"]
 	path = corpora/altafsir_com
 	url = git@github.com:sixtyfive/altafsir_com.git
+[submodule "corpora/altafsir_com_corpus"]
+	path = corpora/altafsir_com_corpus
+	url = git@github.com:sixtyfive/altafsir_com_corpus.git

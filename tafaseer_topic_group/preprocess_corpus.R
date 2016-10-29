@@ -60,6 +60,7 @@ read_files <- function(path.raw, path.extracted, path.temp)
         }
       }
       # Join all pages together into one string, preserving the information of where they were separated
+      # TODO: Make it so only files get written where there is text present!
       data$text = paste(paste('<section>', data$text, sep='', collapse='</section>'), '</section>', sep='')
       # Save the whole shebang into quran_n/aaya_n/madhab_n/tafsir_n.dat
       path.out = file.path(path.extracted, 
