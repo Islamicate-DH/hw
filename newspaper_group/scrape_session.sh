@@ -9,7 +9,9 @@ session=scraper_session # meaning
 
 start="2005-01-01"
 
-week=$(seq 1 4 | xargs -I {} date -d "$start {} day" +%Y/%-m/%d)
+week=$(seq 1 10 | xargs -I {} date -d "$start {} day" +%Y/%-m/%d)
+
+#Rscript ahramScraping.R --start=$start
 
 # outer loop...
 i=0;
@@ -21,4 +23,4 @@ for day in $week; do
 done
 
 
- tmux attach-session -t $session
+tmux attach-session -t $session
