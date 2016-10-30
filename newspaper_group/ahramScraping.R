@@ -1,11 +1,12 @@
 
 
 
+rm(list=ls())
 
 ## keep in mind that your structure might be different
 setwd("~/Dokumente/islamicate2.0/project/") # setting working directory
-
-libs<-c("yaml","rvest","stringr","tidyr","optparse")
+#library(methods) ## is not load by Rscript ('bash-way') by default
+libs<-c("yaml","rvest","stringr","tidyr","optparse","methods")
 for(i in 1:length(libs)){
 suppressPackageStartupMessages(library(libs[i], character.only = TRUE))
 }
@@ -52,33 +53,13 @@ sleep <- function(s)
 }
 
 # # create a sequence of days
-# getDaysToObserve <- function(start,end){
-#   days.to.observe<-seq(as.Date(start), as.Date(end), "days")
-#   days.to.observe<-gsub(" 0", " ", format(days.to.observe, "%Y %m %d"))
-#   return(gsub(" ","/",days.to.observe))
-# }
+getDaysToObserve <- function(start,end){
+  days.to.observe<-seq(as.Date(start), as.Date(end), "days")
+  days.to.observe<-gsub(" 0", " ", format(days.to.observe, "%Y %m %d"))
+  return(gsub(" ","/",days.to.observe))
+}
 
-# Returns specific text-parts of the homepage.
 
-# #could be done like this div#TheMainTableDiv title_list.a
-# getHomepageContent <- function(ahram.homepage){
-#   # there might be less because some of it is written in italic below
-#   # that's the subtitle
-#   print("getHomepageContent")
-#   my.title<-ahram.homepage %>% # load the page
-#     html_nodes("div#divtitle") %>% # isloate the text
-#     html_text() # get the title
-#   
-#   my.abstract<-ahram.homepage %>% # load the page
-#     html_nodes("div#abstractDiv") %>% # isloate the text
-#     html_text() # get the abstract
-#   
-#   my.text<-ahram.homepage %>% # load the page
-#     html_nodes("div#txtBody.bbBodyp") %>% # isloate the text
-#     html_text() # get the text
-#   
-#   return(c(my.title,my.abstract,my.text))
-# }
 
 
 # the result are relative links, of course. they are ordered in some kind of system 130515-130518 which has little 
@@ -104,11 +85,11 @@ getLinksOfAhram <- function(ahram.day){
 
 
 
-# Scrapes Articles of one Day (in combination with bash-script)
+
 scrapeAhramDay <- function(day.to.observe){
-  
   base.ahram.url<- "http://www.ahram.org.eg/archive/"
   ahram.url<-"http://www.ahram.org.eg/archive/news/" # articles are saved one stage down. 
+
   my.filename<-paste("data/",paste(day.to.observe),".yaml",sep="")# the data-format fits the datastructure year/month/day
 
   
@@ -118,68 +99,83 @@ scrapeAhramDay <- function(day.to.observe){
     homepages.v<-getLinksOfAhram(ahram.day)
     
     cat("\nNow I'm scraping all of the (top) articles written on ",day.to.observe,".\n",sep="")
+    titles.v<-NULL; abstract.v<-NULL; text.v<-NULL# initialize variables with NULL to omit overwriting of existing strings.
     
-    titles.v<-NULL
-    abstract.v<-NULL
-    text.v<-NULL
-    
+    # 
     for(i in 1:length(homepages.v)){
-      
-      
-      print(paste(base.ahram.url,homepages.v[i],sep="",collapse = ""))
+
+      #print(paste(base.ahram.url,homepages.v[i],sep="",collapse = ""))
       ahram.homepage <- read_html(paste(base.ahram.url,homepages.v[i],sep="",collapse = ""))
       ## HERE
-      # causes an error when script is started with tmux 
-      # Fehler in as.vector(x, "list") : 
+      # causes an error when script is started with tmux
+      # Fehler in as.vector(x, "list") :
       #   cannot coerce type 'environment' to vector of type 'list'
       # Ruft auf: scrapeAhramDay ... <Anonymous> -> lapply -> as.list -> as.list.default
       # Ausführung angehalten
-      
+
       titles.v[i]<-ahram.homepage %>% html_nodes("div#divtitle") %>% html_text() # get title
       abstract.v[i]<-ahram.homepage %>% html_nodes("div#abstractDiv") %>% html_text() #get the abstract
       text.v[i]<-ahram.homepage %>% html_nodes("div#txtBody.bbBodyp") %>% html_text() # get the text
+      sleep(0.5)# ...be patient. this is going to take forever.
       
-      sleep(0.1)# ...be patient. this is going to take forever.
     }
     
-    
-    # @todo META-Data
-    # subtitle in span#txtSource.bbsubtitle
+    # @todo META-Data  # subtitle in span#txtSource.bbsubtitle
+   
     my.df<-data.frame(rep("Ahram",length(homepages.v)),day.to.observe,titles.v,abstract.v,text.v)
     colnames(my.df)<- c("newspaper","date","title","abstract","article")
-    
     write(as.yaml(my.df),my.filename) #write.table(my.df,my.filename,sep="\t",quote = FALSE)
     
-    
-  } else{
-    print("something went wrong.")
-  } #end of if(!file.exists(my.filename))
+  } else
+    {
+      warning("skip")
+    } 
 }
+
 
 ## stolen from tafaseer_topic_group...
 # Get Parameters passed by the bash script
-
 option_list = list(
   make_option(
-    c('-b', '--start'), 
+    c('-b', '--day'), 
     action='store', default=NA, type='character',
     help='Where to start downloading.')
 ); o = parse_args(OptionParser(option_list=option_list))
 
-# with bash-script
 
-scrapeAhramDay(o$start)# causes an error.
-#scrapeAhramDay('2005/1/1') # works just fine.
-# if you're just starting the script
-# scrapeAhram(getDaysToObserve("2005-01-01","2005-01-07"))
 
-# how to get your data (example)
+
+## if you're just starting the script
+## this might be a better to read:
+## the function is called per day.
+# days.to.observe.v<-getDaysToObserve("2005-01-10","2005-01-31")
+# sapply(days.to.observe.v, scrapeAhramDay)
+# rm(list=ls())
+
+
+## with bash-script
+scrapeAhramDay(o$day)# causes an error.
+
+
+## how to get your data (example)
 #my.yaml.ob.as.data.frame<-as.data.frame(yaml.load_file("data/2005/1/1.yaml"))
 
 
 
 
+######################################################################################################
+#                                           MORE Code...
+######################################################################################################
 
+## vectorised approach. 
+# text.v<-sapply(homepages.v, getElementOfHomepage,my.element="div#divtitle")
+# abstract.v<-sapply(homepages.v, getElementOfHomepage,my.element="div#abstractDiv")
+# text.v<-sapply(homepages.v, getElementOfHomepage,my.element="div#txtBody.bbBodyp")
+# getElementOfHomepage <- function(my.element){
+#   hp.element<-ahram.homepage %>% html_nodes(my.element) %>% html_text() # get title
+#   sleep(0.1)
+#   return(hp.element)
+# }
 
 
 # # Scrapes homepages with a given time-range (days).
@@ -242,5 +238,25 @@ scrapeAhramDay(o$start)# causes an error.
 # }
 
 
+# Returns specific text-parts of the homepage.
 
+# #could be done like this div#TheMainTableDiv title_list.a
+# getHomepageContent <- function(ahram.homepage){
+#   # there might be less because some of it is written in italic below
+#   # that's the subtitle
+#   print("getHomepageContent")
+#   my.title<-ahram.homepage %>% # load the page
+#     html_nodes("div#divtitle") %>% # isloate the text
+#     html_text() # get the title
+#   
+#   my.abstract<-ahram.homepage %>% # load the page
+#     html_nodes("div#abstractDiv") %>% # isloate the text
+#     html_text() # get the abstract
+#   
+#   my.text<-ahram.homepage %>% # load the page
+#     html_nodes("div#txtBody.bbBodyp") %>% # isloate the text
+#     html_text() # get the text
+#   
+#   return(c(my.title,my.abstract,my.text))
+# }
 
