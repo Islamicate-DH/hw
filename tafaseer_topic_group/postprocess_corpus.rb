@@ -30,7 +30,7 @@ class TafsirFile
       print "#{@in_file} => "
     rescue
       puts "Problem parsing '#{@in_file}', aborting."
-      exit
+      abort
     end
   end
 
@@ -43,7 +43,7 @@ class TafsirFile
       puts @out_file
     rescue
       puts "Problem writing '#{@out_file}', aborting."
-      exit
+      abort
     end
   end
 
