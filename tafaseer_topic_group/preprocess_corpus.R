@@ -32,7 +32,7 @@ read_files <- function(path.raw, path.extracted, path.temp, force=FALSE)
         sprintf('quran_%s',  data$position$sura  ),
         sprintf('aaya_%s',   data$position$aaya  ),
         sprintf('madhab_%s', data$position$madhab))
-      outfile = file.path(path.out, sprintf('tafsir_%s.yaml', data$position$tafsir))
+      outfile = file.path(path.out, sprintf('tafsir_%s.yml', data$position$tafsir))
       if (file.exists(outfile) && !force) {
         message('(Skipping...)')
         next
@@ -73,7 +73,7 @@ read_files <- function(path.raw, path.extracted, path.temp, force=FALSE)
         # Join all pages together into one string, preserving the information of where they were separated
         if (stri_length(data$text) == 0) next # But where the tafaseer text is empty, skip ahead
         data$text = paste(paste('<section>', data$text, sep='', collapse='</section>'), '</section>', sep='')
-        # Save the whole shebang into quran_n/aaya_n/madhab_n/tafsir_n.yaml
+        # Save the whole shebang into quran_n/aaya_n/madhab_n/tafsir_n.yml
         message(paste('Writing', outfile))
         dir.create(path.out, showWarnings=FALSE, recursive=TRUE)
         write(as.yaml(data), outfile)
