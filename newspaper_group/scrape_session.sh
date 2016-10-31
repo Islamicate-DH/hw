@@ -1,22 +1,18 @@
 #!/bin/bash
 
 session=scraper_session # meaning
+tmux new-session -d -s $session || exit
 
- tmux new-session -d -s $session || exit
-
-# do loop stuff
-# since we have years/months/days it's a little bit different...
-
-start="2005/01/31"
-
-week=$(seq 1 10 | xargs -I {} date -d "$start {} day" +%Y/%-m/%-d)
+# First we set a starting-point and create a sequence of dates,
+# we are interested in. That's the 2nd number after seq.
+start="2006/07/19"
+week=$(seq 1 50 | xargs -I {} date -d "$start {} day" +%Y/%-m/%-d)
 
 
-
-# outer loop...
+# Now we start a session for each day, meaning we parallize the process
+# making it way faster.
 i=0;
 for day in $week; do
-
     i=$((i+1))
     tmux new-window -t $session:$i -n '' "Rscript ahramScraping.R --day=$day"
 
@@ -24,3 +20,4 @@ done
 
 
 tmux attach-session -t $session
+

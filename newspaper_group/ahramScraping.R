@@ -33,12 +33,6 @@ suppressPackageStartupMessages(library(libs[i], character.only = TRUE))
 
 ## creating subfolders for months 
 
-# end=2012
-# for(year in 2005:end){
-#   for(month in 1:12){
-#     dir.create(file.path("data/",year,month), showWarnings = FALSE,recursive = TRUE)
-#   }
-# }
 
 ######################################################################################################
 #                                           FUNCTIONS
@@ -83,36 +77,27 @@ getLinksOfAhram <- function(ahram.day){
 
 
 
-
-
-
 scrapeAhramDay <- function(day.to.observe){
   base.ahram.url<- "http://www.ahram.org.eg/archive/"
   ahram.url<-"http://www.ahram.org.eg/archive/news/" # articles are saved one stage down. 
 
   my.filename<-paste("data/",paste(day.to.observe),".yaml",sep="")# the data-format fits the datastructure year/month/day
+  
 
   
   if(!file.exists(my.filename)){
-    
+
     ahram.day<-paste(ahram.url,day.to.observe,"/index.aspx",sep="")
     homepages.v<-getLinksOfAhram(ahram.day)
     
     cat("\nNow I'm scraping all of the (top) articles written on ",day.to.observe,".\n",sep="")
     titles.v<-NULL; abstract.v<-NULL; text.v<-NULL# initialize variables with NULL to omit overwriting of existing strings.
     
-    # 
     for(i in 1:length(homepages.v)){
 
       #print(paste(base.ahram.url,homepages.v[i],sep="",collapse = ""))
-      ahram.homepage <- read_html(paste(base.ahram.url,homepages.v[i],sep="",collapse = ""))
-      ## HERE
-      # causes an error when script is started with tmux
-      # Fehler in as.vector(x, "list") :
-      #   cannot coerce type 'environment' to vector of type 'list'
-      # Ruft auf: scrapeAhramDay ... <Anonymous> -> lapply -> as.list -> as.list.default
-      # Ausführung angehalten
-
+     
+      ahram.homepage <- read_html(paste(base.ahram.url,homepages.v[i],sep="",collapse = ""),encoding = "UTF-8") # encoding solves the encoding-issue
       titles.v[i]<-ahram.homepage %>% html_nodes("div#divtitle") %>% html_text() # get title
       abstract.v[i]<-ahram.homepage %>% html_nodes("div#abstractDiv") %>% html_text() #get the abstract
       text.v[i]<-ahram.homepage %>% html_nodes("div#txtBody.bbBodyp") %>% html_text() # get the text
@@ -124,11 +109,17 @@ scrapeAhramDay <- function(day.to.observe){
    
     my.df<-data.frame(rep("Ahram",length(homepages.v)),day.to.observe,titles.v,abstract.v,text.v)
     colnames(my.df)<- c("newspaper","date","title","abstract","article")
+
+
+    # create dir if needed.
+    print(my.filename)
+    dir.create(gsub('/..yaml','',my.filename), showWarnings = FALSE, recursive = TRUE) # extracting year/month from year/month/day
+    # \r and \n still present. not a big problem, they can be removed with other stopwords.
     write(as.yaml(my.df),my.filename) #write.table(my.df,my.filename,sep="\t",quote = FALSE)
     
   } else
     {
-      warning("skip")
+      warning("skip this day.")
     } 
 }
 
@@ -148,12 +139,13 @@ option_list = list(
 ## if you're just starting the script
 ## this might be a better to read:
 ## the function is called per day.
-# days.to.observe.v<-getDaysToObserve("2005-01-10","2005-01-31")
-# sapply(days.to.observe.v, scrapeAhramDay)
+#days.to.observe.v<-getDaysToObserve("2006-01-10","2005-01-02")
+#sapply(days.to.observe.v, scrapeAhramDay)
 # rm(list=ls())
 
+#scrapeAhramDay("2006/8/2")
 
-## with bash-script
+  ## with bash-script
 scrapeAhramDay(o$day)# causes an error.
 
 
@@ -192,7 +184,7 @@ scrapeAhramDay(o$day)# causes an error.
 #     my.filename<-paste("data/",paste(days.to.observe[day]),".yaml",sep="")# the data-format fits the datastructure year/month/day
 #     
 #     if(!file.exists(my.filename)){
-#       ## dir.create(days.to.observe[day], showWarnings = FALSE, recursive = TRUE) ## filename includes .yaml
+#       ## 
 #       
 #       ahram.day<-paste(ahram.url,days.to.observe[day],"/index.aspx",sep="")
 #       homepages.v<-getLinksOfAhram(ahram.day)
