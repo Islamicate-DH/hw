@@ -1,20 +1,22 @@
 #!/usr/bin/env Rscript
 # Only runs on R >= 3.3.1
-# Requires: install.packages(c('rvest', 'XML', 'magrittr', 'stringr', 'jsonlite', 'yaml', 'httr', 'optparse'))
+# Requires: install.packages(c('rvest', 'XML', 'magrittr', 'stringr', 'jsonlite', 'yaml', 'httr', 'optparse', 'stringi'))
 # Remember: every line of code one liability!
 
-for (lib in c('rvest', 'stringr', 'jsonlite', 'yaml', 'httr', 'optparse')) {
+for (lib in c('rvest', 'stringr', 'jsonlite', 'yaml', 'httr', 'optparse', 'stringi')) {
   suppressPackageStartupMessages(library(lib, character.only = TRUE))
 }
 
+# Home-made libraries for the win!
 source(file.path('lib', 'grepx.R'))
 
 path.raw = file.path('..', 'corpora', 'altafsir_com')
 path.extracted = file.path('..', 'corpora', 'altafsir_com_corpus', 'extracted')
-path.temp = file.path('/', 'tmp', 'preprocess_corpus_R')
+path.temp = file.path('tmp') # Right here, why not...
 
 read_files <- function(path.raw, path.extracted, path.temp, force=FALSE)
 {
+  t0 = proc.time()
   # Go through sura directories, save sura number
   #   Go through aaya directories, save aaya number
   #     Go through madhab directories, save madhab number
@@ -23,13 +25,14 @@ read_files <- function(path.raw, path.extracted, path.temp, force=FALSE)
     if (grepl('/tafsir_\\d{2}', path)) {
       data = list() # Whither to put our treasure, arrr!
       regx = 'quran_(?<sura>\\d{3})/aaya_(?<aaya>\\d{3})/madhab_(?<madhab>\\d{2})/tafsir_(?<tafsir>\\d{2})' 
-      data$location = grepx(regx, path)[[1]] # See lib/grepx.R! # Attn: characters, not integers returned!
+      data$position = grepx(regx, path)[[1]] # See lib/grepx.R! # Attn: characters, not integers returned!
+      display_status_message(t0, data$position)
       # Go through page files
       path.out = file.path(path.extracted, 
-        sprintf('quran_%s',  data$location$sura  ),
-        sprintf('aaya_%s',   data$location$aaya  ),
-        sprintf('madhab_%s', data$location$madhab))
-      outfile = file.path(path.out, sprintf('tafsir_%s.yaml', data$location$tafsir))
+        sprintf('quran_%s',  data$position$sura  ),
+        sprintf('aaya_%s',   data$position$aaya  ),
+        sprintf('madhab_%s', data$position$madhab))
+      outfile = file.path(path.out, sprintf('tafsir_%s.yml', data$position$tafsir))
       if (file.exists(outfile) && !force) {
         message('(Skipping...)')
         next
@@ -38,9 +41,9 @@ read_files <- function(path.raw, path.extracted, path.temp, force=FALSE)
           raw_html = read_html(infile, encoding='utf8')
           regx = 'page_(?<page>\\d{2})\\.html'
           page = as.numeric(grepx(regx, infile)[[1]]$page)
+          message(paste('Processing', infile))
           # Open first page file
           if (page == 1) {
-            message(paste(format(Sys.time(), '%Y-%m-%d/%H:%M:%S:'), '\nProcessing', infile))
             # Figure out meta data
             #   Save tafsir name
             #   Save mufassir name
@@ -50,15 +53,14 @@ read_files <- function(path.raw, path.extracted, path.temp, force=FALSE)
             #   Download the ayah given by directory numbers via GQ API
             data$aaya = gq_get_aaya(
               path.temp,
-              as.numeric(data$location$sura), 
-              as.numeric(data$location$aaya)
+              as.numeric(data$position$sura), 
+              as.numeric(data$position$aaya)
             )
             # Go through subsequent result blocks
             #   Figure out what each block is
             #     With an appropriate tag, add it to the tafsir text
             data$text = c(extract_text(raw_html))
           } else {
-            message(paste('Processing', infile))
             # Keep going through page files, if any
             #   Figure out first block of aayaat, ignore it
             #   Go through subsequent result blocks
@@ -69,9 +71,9 @@ read_files <- function(path.raw, path.extracted, path.temp, force=FALSE)
           }
         }
         # Join all pages together into one string, preserving the information of where they were separated
-        # TODO: Make it so only files get written where there is text present!
+        if (stri_length(data$text) == 0) next # But where the tafaseer text is empty, skip ahead
         data$text = paste(paste('<section>', data$text, sep='', collapse='</section>'), '</section>', sep='')
-        # Save the whole shebang into quran_n/aaya_n/madhab_n/tafsir_n.dat
+        # Save the whole shebang into quran_n/aaya_n/madhab_n/tafsir_n.yml
         message(paste('Writing', outfile))
         dir.create(path.out, showWarnings=FALSE, recursive=TRUE)
         write(as.yaml(data), outfile)
@@ -80,11 +82,27 @@ read_files <- function(path.raw, path.extracted, path.temp, force=FALSE)
   }
 }
 
+display_status_message <- function(t0, position) {
+  delim = rep('–', 115)
+  message(
+    c("\033[2J","\033[0;0H"), 
+    delim, '\n Working…\n', 
+    delim,
+    sprintf('\nSura:\t%s | ',  position$sura),
+    sprintf('Ayah:\t%s | ',    position$aaya),
+    sprintf('Madhab:\t%s | ', position$madhab),
+    sprintf('Tafsir:\t%s | ',  position$tafsir),
+    sprintf('Time elapsed:\t%.0f min\n', (proc.time() - t0)[3] / 60),
+    delim
+  ) 
+}
+
 extract_text <- function(raw_html)
 {
   text <- raw_html %>%
     html_nodes('#SearchResults') %>%
-    html_text()
+    xml_contents()
+  trimws(gsub('[\r\n]', '', toString(text)))
 }
 
 extract_meta <- function(raw_html)
@@ -102,11 +120,11 @@ extract_meta <- function(raw_html)
 
 gq_get_aaya <- function(path.temp, sura, aaya)
 {
-  path.cache = file.path(path.temp, 'aayat')
+  path.cache = file.path(path.temp, 'aayaat')
   dir.create(path.cache, showWarnings=FALSE, recursive=TRUE)
   file = file.path(path.cache, sprintf('%s,%s', sura, aaya))
   if (file.exists(file)) {
-    return(paste(scan(file, what='character', quiet=TRUE), collapse=' '))
+    return(paste(scan(file, what='character', quiet=TRUE), collapse=' ')) # No simple file.open or so in R?
   } else {
     url = sprintf('http://api.globalquran.com/ayah/%s:%s/quran-simple', sura, aaya)
     json = fromJSON(url)

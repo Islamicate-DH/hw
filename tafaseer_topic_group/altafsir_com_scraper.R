@@ -13,7 +13,7 @@ save_path   = file.path('..', 'corpora', 'altafsir_com')
 
 # Dropdown boxes 1 and 3
 number_of_madahib = 10
-number_of_suwwar  = 114
+number_of_suwar  = 114
 # Dropdown boxes 2 and 4,
 # thank you Christoph!
 number_of_tafaseer_per_madhab = c(8, 20, 10, 2, 7, 7, 4, 3, 5, 2) 
@@ -34,17 +34,17 @@ download_all <- function(url, path, start_pos=c(1,1,1,1), stop_pos=c(0,0,0,0))
     if (!pos_set && madhab < start_pos[1]) {next}
     for (tafsir in 1:number_of_tafaseer_per_madhab[madhab]) {
       if (!pos_set && tafsir < start_pos[2]) {next}
-      for (sura in 1:number_of_suwwar) {
+      for (sura in 1:number_of_suwar) {
         if (!pos_set && sura < start_pos[3]) {next}
         for (aaya in 1:number_of_aayaat_per_sura[sura]) {
-          if (!pos_set) {if (aaya < start_pos[4]) {next} else {pos_set = TRUE}}          
+          if (!pos_set) {if (aaya < start_pos[4]) {next} else {pos_set = TRUE}}
           delim = rep('–', 115)
           message(
             c("\033[2J","\033[0;0H"), delim, '\n Working…\n', delim,
-            sprintf('\n Madrasa:\t%s/%s | ', madhab, number_of_madahib),
-            sprintf('Tafsir:\t%s/%s | ', tafsir, number_of_tafaseer_per_madhab[madhab]),
-            sprintf('sura:\t%s/%s | ', sura, number_of_suwwar),
-            sprintf('Ayah:\t%s/%s | ', aaya, number_of_aayaat_per_sura[sura]),
+            sprintf('\n Madhab:\t%s/%s | ', madhab, number_of_madahib),
+            sprintf('Tafsir:\t%s/%s | ',     tafsir, number_of_tafaseer_per_madhab[madhab]),
+            sprintf('Sura:\t%s/%s | ',       sura,   number_of_suwar),
+            sprintf('Aaya:\t%s/%s | ',       aaya,   number_of_aayaat_per_sura[sura]),
             sprintf('Time elapsed:\t%.0f min\n', (proc.time() - t0)[3] / 60),
             delim, '\n', url)          
           download(url, path, sura, aaya, madhab, tafsir)
