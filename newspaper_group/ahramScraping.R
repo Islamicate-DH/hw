@@ -4,7 +4,7 @@
 rm(list=ls())
 
 ## keep in mind that your structure might be different
-setwd("~/Dokumente/islamicate2.0/project/") # setting working directory
+setwd("~/Dokumente/islamicate2.0/hw/newspaper_group/data") # setting working directory
 #library(methods) ## is not load by Rscript ('bash-way') by default
 libs<-c("yaml","rvest","stringr","tidyr","optparse","methods")
 for(i in 1:length(libs)){
@@ -112,8 +112,8 @@ scrapeAhramDay <- function(day.to.observe){
 
 
     # create dir if needed.
-    print(my.filename)
-    dir.create(gsub('/..yaml','',my.filename), showWarnings = FALSE, recursive = TRUE) # extracting year/month from year/month/day
+    # 
+    dir.create(gsub('/...yaml','',my.filename), showWarnings = FALSE, recursive = TRUE) # extracting year/month from year/month/day
     # \r and \n still present. not a big problem, they can be removed with other stopwords.
     write(as.yaml(my.df),my.filename) #write.table(my.df,my.filename,sep="\t",quote = FALSE)
     
