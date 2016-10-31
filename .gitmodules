@@ -10,3 +10,6 @@
 [submodule "corpora/altafsir_com_corpus"]
 	path = corpora/altafsir_com_corpus
 	url = git@github.com:sixtyfive/altafsir_com_corpus.git
+[submodule "corpora/the_quran_by_aaya"]
+	path = corpora/the_quran_by_aaya
+	url = git@github.com:sixtyfive/the_quran_by_aaya.git
