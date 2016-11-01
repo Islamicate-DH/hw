@@ -41,29 +41,31 @@ one_process_per_madhab()
 # two per core only this time.
 one_tafsir_per_core()
 {
+  touch /tmp/scraped.dat
   while true; do
     cores=6
-    instances=$(ps ax | grep 'altafsir_com_scraper.R' | grep -E '([[s]tart|[s]top)' | wc -l)
     starting_madhab=1
-    starting_tafsir=6
-    last_pos="10,2,114,6"
+    starting_tafsir=1
+    instances=$(ps ax | grep 'altafsir_com_scraper.R' | grep -E '([[s]tart|[s]top)' | wc -l)
     newest_instance=$(ps ax | grep 'altafsir_com_scraper.R' | grep -E '([[s]tart|[s]top)' | tail -1)
-    newest_instance=$(echo $newest_instance | cut -d '=' -f 3 | cut -d ' ' -f 1)
-    newest_madhab=$(echo $newest_instance | cut -d ',' -f 1)
-    newest_tafsir=$(echo $newest_instance | cut -d ',' -f 2)
-
-    if [ "$newest_instance" == "$last_pos" ]; then
+    newest_instance_start_pos=$(echo $newest_instance | cut -d '=' -f 3 | cut -d ' ' -f 1)
+    
+    if [ "$instances" == "" ]; then instances=0; fi
+    if [ "$newest_instance" == "$madahib,$tafaseer[$((madahib-1))],1,1" ]; then
       echo "All through. Stop."
       break
     fi
 
     for madhab in `seq $starting_madhab $madahib`; do
       for tafsir in `seq 1 ${tafaseer[$((madhab-1))]}`; do
-        if [ "$instances" -le "$cores" ] && [ "$madhab" -ge "$newest_madhab" ] && [ "$tafsir" -ge "$starting_tafsir" ] && [ "$tafsir" -gt "$newest_tafsir" ]; then
-          start_pos="$madhab,$tafsir,1,1"
-          stop_pos="$madhab,$tafsir,$last_sura,$last_aaya"
+        start_pos="$madhab,$tafsir,1,1"
+        stop_pos="$madhab,$tafsir,$last_sura,$last_aaya"
+        range="$start_pos-$stop_pos"
+        if [ "$instances" -le "$cores" ] && \
+           [ "$range" != "$(grep $range /tmp/scraped.dat)" ]; then
           echo "Starting process to run from $start_pos to $stop_pos"
-          tmux new-window "Rscript altafsir_com_scraper.R --start=$start_pos --stop=$stop_pos"
+          echo "$range" >> /tmp/scraped.dat
+          tmux new-window "rscript altafsir_com_scraper.r --start=$start_pos --stop=$stop_pos"
           instances=$((instances+1))
         fi
       done
@@ -75,4 +77,4 @@ one_tafsir_per_core()
   done
 }
 
-$1
+$1 # First argument should be the function to run.
