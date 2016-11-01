@@ -43,7 +43,7 @@ one_tafsir_per_core()
 {
   touch /tmp/scraped.dat
   while true; do
-    cores=6
+    cores=1
     starting_madhab=1
     starting_tafsir=1
     instances=$(ps ax | grep 'altafsir_com_scraper.R' | grep -E '([[s]tart|[s]top)' | wc -l)
