@@ -41,7 +41,8 @@ one_process_per_madhab()
 # two per core only this time.
 one_tafsir_per_core()
 {
-  touch /tmp/scraped.dat
+  histfile=tmp/scraped.dat
+  touch $histfile
   while true; do
     cores=6
     starting_madhab=1
@@ -61,11 +62,11 @@ one_tafsir_per_core()
         start_pos="$madhab,$tafsir,1,1"
         stop_pos="$madhab,$tafsir,$last_sura,$last_aaya"
         range="$start_pos-$stop_pos"
-        if [ "$instances" -le "$cores" ] && \
-           [ "$range" != "$(grep $range /tmp/scraped.dat)" ]; then
+        if [ "$instances" -lt "$cores" ] && \
+           [ "$range" != "$(grep $range $histfile)" ]; then
           echo "Starting process to run from $start_pos to $stop_pos"
-          echo "$range" >> /tmp/scraped.dat
-          tmux new-window "rscript altafsir_com_scraper.r --start=$start_pos --stop=$stop_pos"
+          echo "$range" >> $histfile
+          tmux new-window "Rscript altafsir_com_scraper.R --start=$start_pos --stop=$stop_pos"
           instances=$((instances+1))
         fi
       done
