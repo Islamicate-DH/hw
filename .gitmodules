@@ -13,6 +13,3 @@
 [submodule "corpora/newspaper_archive"]
 	path = corpora/newspaper_archive
 	url = git@github.com:tobiasw225/newspaper_archive.git 
-[submodule "newspaper_archive"]
-	path = newspaper_archive
-	url = https://github.com/tobiasw225/newspaper_archive.git
