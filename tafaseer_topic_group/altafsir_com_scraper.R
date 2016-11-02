@@ -3,7 +3,7 @@
 # Requires: install.packages(c('urltools', 'rvest', 'XML', 'magrittr', 'stringr', 'optparse'))
 # Remember: every line of code one liability!
 
-for (lib in c('urltools', 'curl', 'rvest', 'stringr', 'optparse', 'tools')) {
+for (lib in c('urltools', 'curl', 'rvest', 'stringr', 'optparse', 'tools', 'methods')) {
   suppressPackageStartupMessages(library(lib, character.only = TRUE))
 }
 
@@ -106,7 +106,7 @@ download <- function(url, root, sura, aaya, madhab, tafsir)
       message(sprintf('\tSaved page %s to %s', page, file))
     }
     # Now let's find out the actual truth!
-    if (page == 1) {
+    if (page == 1 && file.info(file)$size > 0) {
       no_pages = extract_number_of_pages(read_html(file))}
     # Whatever it is, the show must go on...
     page = page + 1
