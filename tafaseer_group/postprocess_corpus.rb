@@ -53,27 +53,40 @@ class TafsirFile
   end
 
   def clean_html
-    @html.css('font').each do |node|
-      node.remove if node.inner_text == ''
+    @doc = Nokogiri::HTML.fragment('') do |config|
+      config.strict.nonet.noent.noblanks
     end
-    @html.css('section').each do |section|
-      nodes = section.css('div[align="right"][dir="rtl"] font[color]')
-      nodes.each do |node|
-        node.name = 'p'
-        case node['color']
-          when 'Olive'
-            node['class'] = 'poetry_or_grammar'
-          when 'Red'
-            node['class'] = 'hadith'
-          when 'ForestGreen'
-            node['class'] = 'quran'
-        end
-        node.xpath('@color|.//@color').remove
+    builder = Nokogiri::HTML::Builder.with(@doc) do |doc|
+      @html.css('section').each do |section|
+        doc.section {
+          nodes = section.css('div[align="right"][dir="rtl"] font[color]')
+          nodes.each do |node|
+            unless node.inner_text.empty?
+              case node['color']
+                when 'Olive'
+                  css_class = 'poetry_or_grammar'
+                when 'Red'
+                  css_class = 'hadith'
+                when 'ForestGreen'
+                  css_class = 'quran'
+              end
+              if css_class.nil?
+                doc.p {
+                  doc.text node.inner_text
+                }
+              else
+                doc.p(:class => css_class) {
+                  doc.text node.inner_text
+                }
+              end
+            end
+          end
+        }
       end
-      @yaml['text'] << nodes.to_html
     end
+    @yaml['text'] << @doc.to_html
   end
 end
 
-# TafsirFile.convert(testfile)
-files.each {|f| TafsirFile.convert(f)}
+TafsirFile.convert(testfile)
+# files.each {|f| TafsirFile.convert(f)}
