@@ -4,7 +4,7 @@ require 'yaml'
 require 'nokogiri'
 require 'fileutils'
 
-path = File.join('..', 'corpora', 'altafsir_com_corpus', 'extracted')
+path = File.join('..', '..', 'corpora', 'altafsir_com_corpus', 'extracted')
 files = Dir.glob(File.join(path, '**', '*.yml'))
 testfile = File.join(path, 'quran_001/aaya_001/madhab_01/tafsir_01.yml')
 
@@ -88,5 +88,5 @@ class TafsirFile
   end
 end
 
-TafsirFile.convert(testfile)
-# files.each {|f| TafsirFile.convert(f)}
+# TafsirFile.convert(testfile)
+files.each {|f| TafsirFile.convert(f)}

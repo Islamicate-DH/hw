@@ -8,12 +8,12 @@ for (lib in c('rvest', 'stringr', 'jsonlite', 'yaml', 'httr', 'optparse', 'strin
 }
 
 # Home-made libraries for the win!
-source(file.path('lib', 'grepx.R'))
+source(file.path('lib', 'grepx.r'))
 
 paths = list()
-paths$downloaded <- file.path('..', 'corpora', 'altafsir_com')
-paths$extracted  <- file.path('..', 'corpora', 'altafsir_com_corpus', 'extracted')
-paths$quran      <- file.path('..', 'corpora', 'the_quran_by_aaya')
+paths$downloaded <- file.path('..', '..', 'corpora', 'altafsir_com')
+paths$extracted  <- file.path('..', '..', 'corpora', 'altafsir_com_corpus', 'extracted')
+paths$quran      <- file.path('..', '..', 'corpora', 'the_quran_by_aaya')
 
 read_dirs <- function(paths, force=FALSE)
 {

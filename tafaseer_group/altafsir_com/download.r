@@ -9,7 +9,7 @@ for (lib in c('urltools', 'curl', 'rvest', 'stringr', 'optparse', 'tools', 'meth
 
 default_url = 'http://www.altafsir.com/Tafasir.asp?tMadhNo=0&tTafsirNo=0&tSoraNo=1&tAyahNo=1&tDisplay=yes&LanguageID=1'
 parameters  = param_get(default_url, c('tMadhNo', 'tTafsirNo', 'tSoraNo', 'tAyahNo'))
-save_path   = file.path('..', 'corpora', 'altafsir_com')
+save_path   = file.path('..', '..', 'corpora', 'altafsir_com')
 
 # Dropdown boxes 1 and 3
 number_of_madahib = 10
