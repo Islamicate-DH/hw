@@ -19,29 +19,34 @@ read_dirs <- function(paths, force=FALSE)
 {
   t0 = proc.time()
   # Go through sura directories, save sura number
-  #   Go through aaya directories, save aaya number
-  #     Go through madhab directories, save madhab number
-  #       Go through tafsir directories, save tafsir number
-  for (path in list.dirs(paths$downloaded)) {
-    paths$infile <- path
-    if (grepl('/tafsir_\\d{2}', path)) {
-      data = list() # Whither to put our treasure, arrr!
-      regx = 'quran_(?<sura>\\d{3})/aaya_(?<aaya>\\d{3})/madhab_(?<madhab>\\d{2})/tafsir_(?<tafsir>\\d{2})' 
-      data$position = grepx(regx, path)[[1]] # See lib/grepx.R! # Attn: characters, not integers returned!
-      display_status_message(t0, data$position)
-      # Go through page files
-      paths$outpath = file.path(paths$extracted, 
-        sprintf('quran_%s',  data$position$sura  ),
-        sprintf('aaya_%s',   data$position$aaya  ),
-        sprintf('madhab_%s', data$position$madhab))
-      paths$outfile <- file.path(paths$outpath, sprintf('tafsir_%s.yml', data$position$tafsir))
-      if (file.exists(paths$outfile) && !force) {
-        message(paste(paths$outfile, 'exists, skipping infile dir...'))
-      } else {
-        read_files(paths, data)
-      }
-    }
-  }
+  for (p1 in Sys.glob(file.path(paths$downloaded, 'quran_???'))) {
+    # Go through aaya directories, save aaya number
+    for (p2 in Sys.glob(file.path(p1, 'aaya_???'))) {
+      # Go through madhab directories, save madhab number
+      for (p3 in Sys.glob(file.path(p2, 'madhab_??'))) {
+        # Go through tafsir directories, save tafsir number
+        for (path in Sys.glob(file.path(p3, 'tafsir_??'))) {
+          message(path)
+          paths$infile <- path
+          data = list() # Whither to put our treasure, arrr!
+          regx = 'quran_(?<sura>\\d{3})/aaya_(?<aaya>\\d{3})/madhab_(?<madhab>\\d{2})/tafsir_(?<tafsir>\\d{2})' 
+          data$position = grepx(regx, path)[[1]] # See lib/grepx.R! # Attn: characters, not integers returned!
+          display_status_message(t0, data$position)
+          # Go through page files
+          paths$outpath = file.path(paths$extracted, 
+            sprintf('quran_%s',  data$position$sura  ),
+            sprintf('aaya_%s',   data$position$aaya  ),
+            sprintf('madhab_%s', data$position$madhab))
+          paths$outfile <- file.path(paths$outpath, sprintf('tafsir_%s.yml', data$position$tafsir))
+          if (file.exists(paths$outfile) && !force) {
+            message(paste(paths$outfile, 'exists, skipping infile dir...'))
+          } else {
+            read_files(paths, data)
+          }
+        } # path
+      } # p3
+    } # p2
+  } # p1
 }
 
 read_files <- function(paths, data)
