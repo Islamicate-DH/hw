@@ -11,8 +11,8 @@ for (lib in c('rvest', 'stringr', 'jsonlite', 'yaml', 'httr', 'optparse', 'strin
 source(file.path('lib', 'grepx.r'))
 
 paths = list()
-paths$downloaded <- file.path('..', '..', 'corpora', 'altafsir_com')
-paths$extracted  <- file.path('..', '..', 'corpora', 'altafsir_com_corpus', 'extracted')
+paths$downloaded <- file.path('..', '..', 'corpora', 'altafsir_com', 'downloaded')
+paths$extracted  <- file.path('..', '..', 'corpora', 'altafsir_com', 'extracted')
 paths$quran      <- file.path('..', '..', 'corpora', 'the_quran_by_aaya')
 
 read_dirs <- function(paths, force=FALSE)
