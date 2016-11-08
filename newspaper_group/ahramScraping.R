@@ -4,11 +4,11 @@
 rm(list=ls())
 
 ## keep in mind that your structure might be different
-setwd("~/Dokumente/islamicate2.0/hw/newspaper_group/data") # setting working directory
+setwd("~/Dokumente/islamicate2.0/project/") # setting working directory
 #library(methods) ## is not load by Rscript ('bash-way') by default
 libs<-c("yaml","rvest","stringr","tidyr","optparse","methods")
 for(i in 1:length(libs)){
-suppressPackageStartupMessages(library(libs[i], character.only = TRUE))
+  suppressPackageStartupMessages(library(libs[i], character.only = TRUE))
 }
 
 ######################################################################################################
@@ -16,14 +16,14 @@ suppressPackageStartupMessages(library(libs[i], character.only = TRUE))
 ######################################################################################################
 
 ## some dependencies etc.
-
+##libssl-dev
 # install.packages('stringi', configure.args='--disable-cxx11')
-# sudo apt-get install libxml2-dev
+# libxml2-dev
 # sudo apt-get install libcurl4-openssl-dev
 # install.packages("rvest") # error fixed
 # install.packages("yaml")
 #install.packages("optparse")
-
+# install.packages("tidyr)
 # do i have to traverse all stories on the right side or just the top stories?  
 # the problem is that the top stories include articles about europe etc. too.
 
@@ -54,7 +54,14 @@ getDaysToObserve <- function(start,end){
 }
 
 
-
+getLinks <- function(homepage.url,link.element){
+  homepage <- read_html(homepage.url)
+  link.element.v<-homepage %>%
+    html_nodes(link.element) %>% html_attr("href")
+  homepages.v<-unlist(link.element.v)
+  homepages.v<-homepages.v[homepages.v!=""]
+  return(homepages.v)
+}
 
 # the result are relative links, of course. they are ordered in some kind of system 130515-130518 which has little 
 # in common with the date but is ascending.
@@ -63,65 +70,54 @@ getDaysToObserve <- function(start,end){
 #   html_nodes("div#TheMainTableDiv a") %>% html_attr("href") 
 # homepages.v<-unlist(ahram.day.homepage.v)
 
-getLinksOfAhram <- function(ahram.day){
-  ahram.homepage <- read_html(ahram.day)
 
-  ahram.day.homepage.v<-ahram.homepage %>%
-    html_nodes("div#ImpNewsDiv a") %>% html_attr("href")
-  homepages.v<-unlist(ahram.day.homepage.v)
-  homepages.v<-homepages.v[homepages.v!=""]
-  #homepages.v<-homepages.v[grep("comment|#",homepages.v,invert = TRUE)]## remove comments and starting #
-
-  return(homepages.v)
+# e.g. facebook,twitter-links.
+filter_homepages<-function(homepages.v){
+  # i should scrape everything first...
+  # but that could be a way to choose...
+  # these i really don't need
+  
+  #filtering twitter, fb etc lateron.
+  ahram.url<-"http://www.ahram.org.eg/archive/news/" # articles are saved one stage down. 
+  result<-c(
+    # pages are saved as relative links.
+   sapply(ahram.url,paste, homepages.v[grep('http|RssContent|javascript',homepages.v,invert = TRUE)], sep=""),
+  # selects all subpages of ahram which are not links of archive
+  homepages.v[intersect(grep('http://',homepages.v),
+                 grep('ahram',homepages.v)  )]
+  )
+  return(result)
 }
 
-
-
-scrapeAhramDay <- function(day.to.observe){
+scrapeRaw<- function(day.to.observe){
+  
   base.ahram.url<- "http://www.ahram.org.eg/archive/"
   ahram.url<-"http://www.ahram.org.eg/archive/news/" # articles are saved one stage down. 
-
-  my.filename<-paste("data/",paste(day.to.observe),".yaml",sep="")# the data-format fits the datastructure year/month/day
   
+  ahram.day.url<-paste(ahram.url,day.to.observe,"/index.aspx",sep="")
 
-  
-  if(!file.exists(my.filename)){
-
-    ahram.day<-paste(ahram.url,day.to.observe,"/index.aspx",sep="")
-    homepages.v<-getLinksOfAhram(ahram.day)
-    
-    cat("\nNow I'm scraping all of the (top) articles written on ",day.to.observe,".\n",sep="")
-    titles.v<-NULL; abstract.v<-NULL; text.v<-NULL# initialize variables with NULL to omit overwriting of existing strings.
-    
+  homepages.rel.v<-getLinks(ahram.day.url,"a")
+  homepages.v<-filter_homepages(homepages.rel.v)# also prepends http
+  homepages.rel.v<- gsub("/", "_", homepages.rel.v)
     for(i in 1:length(homepages.v)){
-
-      #print(paste(base.ahram.url,homepages.v[i],sep="",collapse = ""))
      
-      ahram.homepage <- read_html(paste(base.ahram.url,homepages.v[i],sep="",collapse = ""),encoding = "UTF-8") # encoding solves the encoding-issue
-      titles.v[i]<-ahram.homepage %>% html_nodes("div#divtitle") %>% html_text() # get title
-      abstract.v[i]<-ahram.homepage %>% html_nodes("div#abstractDiv") %>% html_text() #get the abstract
-      text.v[i]<-ahram.homepage %>% html_nodes("div#txtBody.bbBodyp") %>% html_text() # get the text
-      sleep(0.5)# ...be patient. this is going to take forever.
-      
-    }
-    
-    # @todo META-Data  # subtitle in span#txtSource.bbsubtitle
-   
-    my.df<-data.frame(rep("Ahram",length(homepages.v)),day.to.observe,titles.v,abstract.v,text.v)
-    colnames(my.df)<- c("newspaper","date","title","abstract","article")
+     # to avoid the duplicate issue. also resulting in http:__ (not very relevant)
+      my.filename<-paste("~/Downloads/ahram/nt2013/",homepages.rel.v[i],sep="")
+      if(!file.exists(my.filename)){
 
+        tryCatch({
+          ahram.homepage<-read_html(homepages.v[i],encoding = "UTF-8")
+          write_xml(ahram.homepage,my.filename)
+          
+          sleep(0.1)}
+          ,error = function(e){
+            write(homepages.v[i],"~/Downloads/ahram/nt2013/missed.log",append = TRUE)
+          })
 
-    # create dir if needed.
-    # 
-    dir.create(gsub('/...yaml','',my.filename), showWarnings = FALSE, recursive = TRUE) # extracting year/month from year/month/day
-    # \r and \n still present. not a big problem, they can be removed with other stopwords.
-    write(as.yaml(my.df),my.filename) #write.table(my.df,my.filename,sep="\t",quote = FALSE)
-    
-  } else
-    {
-      warning("skip this day.")
-    } 
-}
+      }# end of file.exists
+      else{print(paste("skip",homepages.v[i],"because i have it already.",sep=" "))}
+    }# end of for-loop
+} # end of scrapeRaw-function
 
 
 ## stolen from tafaseer_topic_group...
@@ -139,18 +135,69 @@ option_list = list(
 ## if you're just starting the script
 ## this might be a better to read:
 ## the function is called per day.
-#days.to.observe.v<-getDaysToObserve("2006-01-10","2005-01-02")
+#days.to.observe.v<-getDaysToObserve("2012-12-11","2016-10-31")
 #sapply(days.to.observe.v, scrapeAhramDay)
-# rm(list=ls())
+#sapply(days.to.observe.v, scrapeRaw)
 
-#scrapeAhramDay("2006/8/2")
+#scrapeAhramDay("2007/8/1")
 
   ## with bash-script
-scrapeAhramDay(o$day)# causes an error.
+#scrapeAhramDay(o$day)# causes an error.
 
-
+#scrapeRaw("2011/6/1")
+scrapeRaw(o$day)
 ## how to get your data (example)
-#my.yaml.ob.as.data.frame<-as.data.frame(yaml.load_file("data/2005/1/1.yaml"))
+# 
+# days.to.load.v<-getDaysToObserve("2006-01-10","2006-1-11")
+# result<-sapply(days.to.load.v,my.yaml.loader)
+# result[,"2006/1/10"]
+# 
+# my.yaml.loader <- function(day.to.load){
+#   my.filename<-paste("data/",paste(day.to.load),".yaml",sep="")
+#   return(as.data.frame(yaml.load_file(my.filename)))
+# }
+
+
+scrapeAhramDay <- function(day.to.observe){
+  base.ahram.url<- "http://www.ahram.org.eg/archive/"
+  ahram.url<-"http://www.ahram.org.eg/archive/news/" # articles are saved one stage down. 
+  
+  my.filename<-paste("data/",paste(day.to.observe),".yaml",sep="")# the data-format fits the datastructure year/month/day
+  
+  if(!file.exists(my.filename)){
+    
+    ahram.day.url<-paste(ahram.url,day.to.observe,"/index.aspx",sep="")
+    homepages.v<-getLinks(ahram.day.url,"div#ImpNewsDiv a")### div#TheMainTableDiv a
+    cat("\nNow I'm scraping all of the (top) articles written on ",day.to.observe,".\n",sep="")
+    titles.v<-NULL; abstract.v<-NULL; text.v<-NULL# initialize variables with NULL to omit overwriting of existing strings.
+    
+    for(i in 1:length(homepages.v)){
+      
+      #print(paste(base.ahram.url,homepages.v[i],sep="",collapse = ""))
+      
+      ahram.homepage <- read_html(paste(base.ahram.url,homepages.v[i],sep="",collapse = ""),encoding = "UTF-8") # encoding solves the encoding-issue
+      
+      titles.v[i]<-ahram.homepage %>% html_node("div#divtitle") %>% html_text() # get title
+      # titles.v[i]<-gsub('/r||/n','',titles.v[i])
+      abstract.v[i]<-ahram.homepage %>% html_node("div#abstractDiv") %>% html_text() #get the abstract
+      text.v[i]<-ahram.homepage %>% html_node("div#txtBody.bbBodyp") %>% html_text() # get the text
+      sleep(0.5)# ...be patient. this is going to take forever.
+      
+    }
+    
+    # @todo META-Data  # subtitle in span#txtSource.bbsubtitle
+    
+    my.df<-data.frame(rep("Ahram",length(homepages.v)),day.to.observe,titles.v,abstract.v,text.v)
+    colnames(my.df)<- c("newspaper","date","title","abstract","article")
+    
+    
+    # create dir if needed.
+    dir.create(gsub('/..yaml','',my.filename), showWarnings = FALSE, recursive = TRUE) # extracting year/month from year/month/day
+    # \r and \n still present. not a big problem, they can be removed with other stopwords.
+    write(as.yaml(my.df),my.filename) #write.table(my.df,my.filename,sep="\t",quote = FALSE)
+  } else    
+  {   warning("skip this day.")   } 
+}
 
 
 
@@ -251,4 +298,17 @@ scrapeAhramDay(o$day)# causes an error.
 #   
 #   return(c(my.title,my.abstract,my.text))
 # }
+# getLinksOfAhram <- function(ahram.day){
+#   ahram.homepage <- read_html(ahram.day)
+#   
+#   ahram.day.homepage.v<-ahram.homepage %>%
+#     html_nodes("div#ImpNewsDiv a") %>% html_attr("href")
+#   homepages.v<-unlist(ahram.day.homepage.v)
+#   homepages.v<-homepages.v[homepages.v!=""]
+#   #homepages.v<-homepages.v[grep("comment|#",homepages.v,invert = TRUE)]## remove comments and starting #
+#   
+#   return(homepages.v)
+# }
+# 
+
 
