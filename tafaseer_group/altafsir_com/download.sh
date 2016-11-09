@@ -15,7 +15,7 @@ one_process_per_tafsir()
   i=0; for madhab in `seq 1 $madahib`; do
     for tafsir in `seq 1 ${tafaseer[$((madhab-1))]}`; do
       i=$((i+1))
-      tmux new-window -t $session:$i "Rscript altafsir_com_scraper.R --start=$madhab,$tafsir,1,1 --stop=$madhab,$tafsir,$last_sura,$last_aaya"
+      tmux new-window -t $session:$i "Rscript download.R --start=$madhab,$tafsir,1,1 --stop=$madhab,$tafsir,$last_sura,$last_aaya"
     done
   done
   tmux attach-session -t $session
@@ -33,7 +33,7 @@ one_process_per_tafsir()
 one_process_per_madhab()
 {
   for madhab in `seq 1 $madahib`; do
-    tmux new-window "Rscript altafsir_com_scraper.R --start=$madhab,1,1,1 --stop=$madhab,${tafaseer[$((madhab-1))]},$last_sura,$last_aaya"
+    tmux new-window "Rscript download.R --start=$madhab,1,1,1 --stop=$madhab,${tafaseer[$((madhab-1))]},$last_sura,$last_aaya"
   done
 }
 
@@ -47,8 +47,8 @@ one_tafsir_per_core()
     cores=1
     starting_madhab=1
     starting_tafsir=1
-    instances=$(ps ax | grep 'altafsir_com_scraper.R' | grep -E '([[s]tart|[s]top)' | wc -l)
-    newest_instance=$(ps ax | grep 'altafsir_com_scraper.R' | grep -E '([[s]tart|[s]top)' | tail -1)
+    instances=$(ps ax | grep 'download.R' | grep -E '([[s]tart|[s]top)' | wc -l)
+    newest_instance=$(ps ax | grep 'download.R' | grep -E '([[s]tart|[s]top)' | tail -1)
     newest_instance_start_pos=$(echo $newest_instance | cut -d '=' -f 3 | cut -d ' ' -f 1)
     
     if [ "$instances" == "" ]; then instances=0; fi
@@ -66,7 +66,7 @@ one_tafsir_per_core()
            [ "$range" != "$(grep $range $histfile)" ]; then
           echo "Starting process to run from $start_pos to $stop_pos"
           echo "$range" >> $histfile
-          tmux new-window "Rscript altafsir_com_scraper.R --start=$start_pos --stop=$stop_pos"
+          tmux new-window "Rscript download.R --start=$start_pos --stop=$stop_pos"
           instances=$((instances+1))
         fi
       done
