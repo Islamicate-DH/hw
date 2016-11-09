@@ -9,50 +9,56 @@
 rm(list=ls())
 source("basic_functions.R")
 # actually not needed.
-setwd("~/Dokumente/islamicate2.0/project/hespress") # setting working directory
+#setwd("~/Dokumente/islamicate2.0/project/hespress") # setting working directory
 
 libs<-c("yaml","rvest","stringr","tidyr","optparse","methods","beepr")
 for(i in 1:length(libs)){
   suppressPackageStartupMessages(library(libs[i], character.only = TRUE))
 }
-
+library(curl)
 ###############################################################################
 ##                              FUNCTIONS
 ###############################################################################
 
 
+scrape.index<- function(day.links,target.folder){
+  for (link in day.links) {
+    file <- paste(target.folder, gsub("/", "_", link), sep = "")
+    ## if the file is already downloaded, skip it.
+    if (!file.exists(file)) {
+      tryCatch({
+        article.homepage<-read_html(curl(paste("http://www.hespress.com", link, sep = ""), handle = curl::new_handle("useragent" = "Mozilla/5.0")), encoding = "UTF-8")
+        write_xml(article.homepage, file)
+        sleep(0.1)
+      }
+      , error = function(e) {
+        write(gsub("/", "_", link),
+              paste(target.folder,"missed.log",sep=""),
+              append = TRUE)
+      })
+    }
+  }
+  
+}
+
+### source folder ist hier irreführend
 scrape.day <- function(hespress.url) {
-  source.folder<-"~/Dokumente/islamicate2.0/hw/corpora/newspaper_archive/Hespress/hespress2011/"
+  target.folder<-"~/Dokumente/islamicate2.0/hw/corpora/newspaper_archive/Hespress/hespress2014/"
     
   ## while there is still another index-page for the current day continue scraping.
   while (length(grep("index", hespress.url)) > 0) {
-    homepage <- read_html(hespress.url)
-    #page is an index-page, scrape it better: find all links and apply.
-    
-    day.links <-
-      homepage %>% html_nodes("h2.section_title a") %>% html_attr("href")
-    ## Each index page has several articles which I want to save.
-    for (link in day.links) {
-      file <- paste(source.folder, gsub("/", "_", link), sep = "")
-      ## if the file is already downloaded, skip it.
-      if (!file.exists(file)) {
-        tryCatch({
-          article.homepage <-
-            read_html(paste("http://www.hespress.com", link, sep = ""),
-                      encoding = "UTF-8")
-          write_xml(article.homepage, file)
-          sleep(0.1)
-        }
-        , error = function(e) {
-          write(gsub("/", "_", link),
-                paste(source.folder,"missed.log",sep=""),
-                append = TRUE)
-        })
-      }
-    }
-    ## 'increment' the index-page/ continue with the next day if it doesn't exist
-    hespress.url <- homepage %>% html_node("span.page_active+a") %>% html_attr("href") # go to next index
-    print(hespress.url)
+
+    tryCatch({ 
+      homepage<-read_html(hespress.url)
+             
+      day.links <- homepage %>% html_nodes("h2.section_title a") %>% html_attr("href")
+      scrape.index(day.links,target.folder)## Each index page has several articles which I want to save.
+      print(hespress.url)
+      hespress.url <- homepage %>% html_node("span.page_active+a") %>% html_attr("href") # go to next index
+    }, error = function(e) {
+      print(paste(hespress.url,e,sep=" "))
+    })
+
   }
   
 }
@@ -96,7 +102,7 @@ clean.hespress <- function(source.folder){
 
 ## First I set a time-sequence which I want to download. Here I chose 1 year.
 ## The function generates 365 date for each day (or more if you chose a larger intervall).
-days.to.scrape<-generateTimeSequence("2011/6/6","2011/12/31")
+days.to.scrape<-generateTimeSequence("2014/1/1","2014/12/31")
 hp.base<-"http://www.hespress.com/archive/"
 
 ## Here I generate the direct pages to the first index-page of the corresponding day.
@@ -108,7 +114,13 @@ days.to.scrape.url.v<-sapply(hp.base,paste,days.to.scrape,"/index.1.html",sep=""
 sapply(days.to.scrape.url.v, scrape.day)
 
 
-
-
-source.folder<- "hespress2012"
-clean.hespress(source.folder)
+# option_list = list(
+#   make_option(
+#     c('-b', '--day'), 
+#     action='store', default=NA, type='character',
+#     help='Where to start downloading.')
+# ); o = parse_args(OptionParser(option_list=option_list))
+# 
+# scrape.day(o$day)
+#source.folder<- "hespress2011"
+#clean.hespress(source.folder)

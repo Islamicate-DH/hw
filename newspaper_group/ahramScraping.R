@@ -1,16 +1,17 @@
-
-
+##                                                                        
+##                            Ahram Scraper
+##
+## 
 
 rm(list=ls())
-
-## keep in mind that your structure might be different
 setwd("~/Dokumente/islamicate2.0/project/") # setting working directory
-#library(methods) ## is not load by Rscript ('bash-way') by default
-libs<-c("yaml","rvest","stringr","tidyr","optparse","methods")
+
+libs<-c("yaml","rvest","stringr","tidyr","optparse","methods","beepr")
 for(i in 1:length(libs)){
   suppressPackageStartupMessages(library(libs[i], character.only = TRUE))
 }
 
+source("basic_functions.R")
 ######################################################################################################
 #                                           NOTES
 ######################################################################################################
@@ -34,24 +35,11 @@ for(i in 1:length(libs)){
 ## creating subfolders for months 
 
 
-######################################################################################################
-#                                           FUNCTIONS
-######################################################################################################
 
-# sleeping function as found in tafaseer_topic_group
-sleep <- function(s)
-{
-  t0 = proc.time()
-  Sys.sleep(s)
-  proc.time() - t0
-}
+###############################################################################
+##                              FUNCTIONS
+###############################################################################
 
-# # create a sequence of days
-getDaysToObserve <- function(start,end){
-  days.to.observe<-seq(as.Date(start), as.Date(end), "days")
-  days.to.observe<-gsub(" 0", " ", format(days.to.observe, "%Y %m %d"))
-  return(gsub(" ","/",days.to.observe))
-}
 
 
 getLinks <- function(homepage.url,link.element){
@@ -120,42 +108,6 @@ scrapeRaw<- function(day.to.observe){
 } # end of scrapeRaw-function
 
 
-## stolen from tafaseer_topic_group...
-# Get Parameters passed by the bash script
-option_list = list(
-  make_option(
-    c('-b', '--day'), 
-    action='store', default=NA, type='character',
-    help='Where to start downloading.')
-); o = parse_args(OptionParser(option_list=option_list))
-
-
-
-
-## if you're just starting the script
-## this might be a better to read:
-## the function is called per day.
-#days.to.observe.v<-getDaysToObserve("2012-12-11","2016-10-31")
-#sapply(days.to.observe.v, scrapeAhramDay)
-#sapply(days.to.observe.v, scrapeRaw)
-
-#scrapeAhramDay("2007/8/1")
-
-  ## with bash-script
-#scrapeAhramDay(o$day)# causes an error.
-
-#scrapeRaw("2011/6/1")
-scrapeRaw(o$day)
-## how to get your data (example)
-# 
-# days.to.load.v<-getDaysToObserve("2006-01-10","2006-1-11")
-# result<-sapply(days.to.load.v,my.yaml.loader)
-# result[,"2006/1/10"]
-# 
-# my.yaml.loader <- function(day.to.load){
-#   my.filename<-paste("data/",paste(day.to.load),".yaml",sep="")
-#   return(as.data.frame(yaml.load_file(my.filename)))
-# }
 
 
 scrapeAhramDay <- function(day.to.observe){
@@ -199,116 +151,86 @@ scrapeAhramDay <- function(day.to.observe){
   {   warning("skip this day.")   } 
 }
 
+clean.ahram<- function(dirname){
+  my.filename<-paste(dirname,".csv",sep = "")
+  
+  for(my.file in dir(dirname,pattern = "aspx")){
+    
+    tryCatch({
+      
+      ahram.homepage <- read_html(paste(dirname,"/",my.file,sep=""),encoding = "UTF-8")
+      
+      text.c<-ahram.homepage %>% html_node("div#txtBody.bbBodyp") %>% html_text() # get the text
+      # gsub removes "
+      if(nchar(text.c)>1){
+        # if there is any text, append it to the table. 
+        title<-ahram.homepage %>% html_node("div#divtitle") %>% html_text() # get title
+        my.date<- ahram.homepage %>% html_node("td#header1_DateTD") %>% html_text() # get title
+        my.date<-unlist(strsplit(my.date," ")) # splitting the date-string into substrings
+        year<-suppressWarnings(min(my.date[which(as.numeric(my.date)>=2010)]))
+        month<- my.date[which(my.date==year)-1]
+        day<-my.date[which(my.date==year)-2]
+        write.table(data.frame(year,month,day,gsub("\"","",text.c),gsub("\"","",title),"Ahram",my.file),col.names = FALSE,row.names = FALSE,my.filename,sep = ",",fileEncoding = "UTF-8",append = T)
+      } else{
+        # else write a log with a message so we can find the page
+        write(paste("page",my.file, "had no suitable tag/text",sep=" "),"log",append = TRUE )
+      }
+      
+    },error =function(e){write(paste("page",my.file,"could not be loaded",sep=" "),"log",append = TRUE )}) 
+  }
+  for(i in 1:4){beep(i)}
+  
+}
+
+## stolen from tafaseer_topic_group...
+# Get Parameters passed by the bash script
+option_list = list(
+  make_option(
+    c('-b', '--day'), 
+    action='store', default=NA, type='character',
+    help='Where to start downloading.')
+); o = parse_args(OptionParser(option_list=option_list))
+
+
+###############################################################################
+##                          CALLING THE FUNCTIONS
+###############################################################################
+
+
+## if you're just starting the script
+## this might be a better to read:
+## the function is called per day.
+#days.to.observe.v<-generateTimeSequence("2012-12-11","2016-10-31")
+#sapply(days.to.observe.v, scrapeAhramDay)
+#sapply(days.to.observe.v, scrapeRaw)
+
+#scrapeAhramDay("2007/8/1")
+
+  ## with bash-script
+#scrapeAhramDay(o$day)# causes an error.
+
+#scrapeRaw("2011/6/1")
+scrapeRaw(o$day)
+
+
+clean.ahram(dirname = "raw_2012_12_12-2016_10_31")
 
 
 
-######################################################################################################
-#                                           MORE Code...
-######################################################################################################
-
-## vectorised approach. 
-# text.v<-sapply(homepages.v, getElementOfHomepage,my.element="div#divtitle")
-# abstract.v<-sapply(homepages.v, getElementOfHomepage,my.element="div#abstractDiv")
-# text.v<-sapply(homepages.v, getElementOfHomepage,my.element="div#txtBody.bbBodyp")
-# getElementOfHomepage <- function(my.element){
-#   hp.element<-ahram.homepage %>% html_nodes(my.element) %>% html_text() # get title
-#   sleep(0.1)
-#   return(hp.element)
-# }
+# might be nec. to change this.
+Sys.setlocale("LC_TIME", "ar_AE.utf8");
+month.dates<-seq(as.Date("2012-01-01"), as.Date("2012-12-31"), "months")
+month.names<-format(month.dates, "%B")
 
 
-# # Scrapes homepages with a given time-range (days).
-# scrapeAhram <- function(days.to.observe){
-#   
-#   # dotted.line<-rep("-",130)
-#   # cat(dotted.line,"\n","\t\t\t\t\tWelcome to our Ahram-Scraper!","\n",dotted.line,collapse="",sep="")
-#   
-#   base.ahram.url<- "http://www.ahram.org.eg/archive/"
-#   ahram.url<-"http://www.ahram.org.eg/archive/news/" # articles are saved one stage down. 
-#   
-#   
-#   for(day in 1:length(days.to.observe)){
-#     my.filename<-paste("data/",paste(days.to.observe[day]),".yaml",sep="")# the data-format fits the datastructure year/month/day
-#     
-#     if(!file.exists(my.filename)){
-#       ## 
-#       
-#       ahram.day<-paste(ahram.url,days.to.observe[day],"/index.aspx",sep="")
-#       homepages.v<-getLinksOfAhram(ahram.day)
-#       sleep(0.1)# ...be patient. this is going to take forever.
-#       cat("\nNow I'm scraping all of the (top) articles written on ",days.to.observe[day],".",sep="")
-#       
-#       titles.v<-rep("",length(homepages.v))
-#       abstract.v<-rep("",length(homepages.v))
-#       text.v<-rep("",length(homepages.v))
-#       
-#       for(i in 1:length(homepages.v)){
-#         
-#         
-#         
-#         cat("I'm currently scraping ", base.ahram.url,homepages.v[i],"\n",sep="")
-#         ahram.homepage <- read_html(paste(base.ahram.url,homepages.v[i],sep="") )
-#         # write(length(ahram.homepage),my.filename)
-#         # result<-getHomepageContent(ahram.homepage)
-#         # titles.v[i]<-result[1]
-#         # abstract.v[i]<-result[2]
-#         # text.v[i]<-result[2]
-#         titles.v[i]<-ahram.homepage %>% html_nodes("div#divtitle") %>% html_text() # get the title
-#         abstract.v[i]<-ahram.homepage %>% html_nodes("div#abstractDiv") %>% html_text() # get the abstract
-#         text.v[i]<-ahram.homepage %>% html_nodes("div#txtBody.bbBodyp") %>% html_text() # get the text
-#         
-#         sleep(0.1)# ...be patient. this is going to take forever.
-#       }
-#       
-#       # cat("Writing all of",days.to.observe[day],"to the corresponding file in data/year/month",sep=" ")
-#       
-#       # @todo META-Data
-#       # subtitle in span#txtSource.bbsubtitle
-#       my.df<-data.frame(rep("Ahram",length(homepages.v)),days.to.observe[day],titles.v,abstract.v,text.v)
-#       colnames(my.df)<- c("newspaper","date","title","abstract","article")
-#       
-#       write(as.yaml(my.df),my.filename) #write.table(my.df,my.filename,sep="\t",quote = FALSE)
-#       
-#       sleep(2)
-#     }
-#     
-#   }
-#   print("finish.")
-# }
 
-
-# Returns specific text-parts of the homepage.
-
-# #could be done like this div#TheMainTableDiv title_list.a
-# getHomepageContent <- function(ahram.homepage){
-#   # there might be less because some of it is written in italic below
-#   # that's the subtitle
-#   print("getHomepageContent")
-#   my.title<-ahram.homepage %>% # load the page
-#     html_nodes("div#divtitle") %>% # isloate the text
-#     html_text() # get the title
-#   
-#   my.abstract<-ahram.homepage %>% # load the page
-#     html_nodes("div#abstractDiv") %>% # isloate the text
-#     html_text() # get the abstract
-#   
-#   my.text<-ahram.homepage %>% # load the page
-#     html_nodes("div#txtBody.bbBodyp") %>% # isloate the text
-#     html_text() # get the text
-#   
-#   return(c(my.title,my.abstract,my.text))
-# }
-# getLinksOfAhram <- function(ahram.day){
-#   ahram.homepage <- read_html(ahram.day)
-#   
-#   ahram.day.homepage.v<-ahram.homepage %>%
-#     html_nodes("div#ImpNewsDiv a") %>% html_attr("href")
-#   homepages.v<-unlist(ahram.day.homepage.v)
-#   homepages.v<-homepages.v[homepages.v!=""]
-#   #homepages.v<-homepages.v[grep("comment|#",homepages.v,invert = TRUE)]## remove comments and starting #
-#   
-#   return(homepages.v)
-# }
+## how to get your data (example)
 # 
-
-
+# days.to.load.v<-generateTimeSequence("2006-01-10","2006-1-11")
+# result<-sapply(days.to.load.v,my.yaml.loader)
+# result[,"2006/1/10"]
+# 
+# my.yaml.loader <- function(day.to.load){
+#   my.filename<-paste("data/",paste(day.to.load),".yaml",sep="")
+#   return(as.data.frame(yaml.load_file(my.filename)))
+# }
