@@ -4,7 +4,7 @@
 ## 
 
 rm(list=ls())
-setwd("~/Dokumente/islamicate2.0/project/") # setting working directory
+#setwd("~/Dokumente/islamicate2.0/hw/newspaper_group/Aharam/2013/") # setting working directory
 
 libs<-c("yaml","rvest","stringr","tidyr","optparse","methods","beepr")
 for(i in 1:length(libs)){
@@ -78,7 +78,7 @@ filter_homepages<-function(homepages.v){
 }
 
 scrapeRaw<- function(day.to.observe){
-  
+  target.folder<- "~/Dokumente/islamicate2.0/hw/corpora/newspaper_archive/Aharam/2013"
   base.ahram.url<- "http://www.ahram.org.eg/archive/"
   ahram.url<-"http://www.ahram.org.eg/archive/news/" # articles are saved one stage down. 
   
@@ -86,11 +86,15 @@ scrapeRaw<- function(day.to.observe){
 
   homepages.rel.v<-getLinks(ahram.day.url,"a")
   homepages.v<-filter_homepages(homepages.rel.v)# also prepends http
+  
+  homepages.v<-homepages.v[grep("*[0-9].aspx$", homepages.v)]# i'm only interested in the articles
+  
   homepages.rel.v<- gsub("/", "_", homepages.rel.v)
     for(i in 1:length(homepages.v)){
      
      # to avoid the duplicate issue. also resulting in http:__ (not very relevant)
-      my.filename<-paste("~/Downloads/ahram/nt2013/",homepages.rel.v[i],sep="")
+      my.filename <- paste(target.folder, gsub("/", "_", homepages.rel.v[i]), sep = "/")
+      print(my.filename)
       if(!file.exists(my.filename)){
 
         tryCatch({
@@ -99,7 +103,7 @@ scrapeRaw<- function(day.to.observe){
           
           sleep(0.1)}
           ,error = function(e){
-            write(homepages.v[i],"~/Downloads/ahram/nt2013/missed.log",append = TRUE)
+            write(homepages.v[i],paste(target.folder,'log',sep=""),append = TRUE)
           })
 
       }# end of file.exists
@@ -108,48 +112,6 @@ scrapeRaw<- function(day.to.observe){
 } # end of scrapeRaw-function
 
 
-
-
-scrapeAhramDay <- function(day.to.observe){
-  base.ahram.url<- "http://www.ahram.org.eg/archive/"
-  ahram.url<-"http://www.ahram.org.eg/archive/news/" # articles are saved one stage down. 
-  
-  my.filename<-paste("data/",paste(day.to.observe),".yaml",sep="")# the data-format fits the datastructure year/month/day
-  
-  if(!file.exists(my.filename)){
-    
-    ahram.day.url<-paste(ahram.url,day.to.observe,"/index.aspx",sep="")
-    homepages.v<-getLinks(ahram.day.url,"div#ImpNewsDiv a")### div#TheMainTableDiv a
-    cat("\nNow I'm scraping all of the (top) articles written on ",day.to.observe,".\n",sep="")
-    titles.v<-NULL; abstract.v<-NULL; text.v<-NULL# initialize variables with NULL to omit overwriting of existing strings.
-    
-    for(i in 1:length(homepages.v)){
-      
-      #print(paste(base.ahram.url,homepages.v[i],sep="",collapse = ""))
-      
-      ahram.homepage <- read_html(paste(base.ahram.url,homepages.v[i],sep="",collapse = ""),encoding = "UTF-8") # encoding solves the encoding-issue
-      
-      titles.v[i]<-ahram.homepage %>% html_node("div#divtitle") %>% html_text() # get title
-      # titles.v[i]<-gsub('/r||/n','',titles.v[i])
-      abstract.v[i]<-ahram.homepage %>% html_node("div#abstractDiv") %>% html_text() #get the abstract
-      text.v[i]<-ahram.homepage %>% html_node("div#txtBody.bbBodyp") %>% html_text() # get the text
-      sleep(0.5)# ...be patient. this is going to take forever.
-      
-    }
-    
-    # @todo META-Data  # subtitle in span#txtSource.bbsubtitle
-    
-    my.df<-data.frame(rep("Ahram",length(homepages.v)),day.to.observe,titles.v,abstract.v,text.v)
-    colnames(my.df)<- c("newspaper","date","title","abstract","article")
-    
-    
-    # create dir if needed.
-    dir.create(gsub('/..yaml','',my.filename), showWarnings = FALSE, recursive = TRUE) # extracting year/month from year/month/day
-    # \r and \n still present. not a big problem, they can be removed with other stopwords.
-    write(as.yaml(my.df),my.filename) #write.table(my.df,my.filename,sep="\t",quote = FALSE)
-  } else    
-  {   warning("skip this day.")   } 
-}
 
 clean.ahram<- function(dirname){
   my.filename<-paste(dirname,".csv",sep = "")
@@ -209,11 +171,11 @@ option_list = list(
   ## with bash-script
 #scrapeAhramDay(o$day)# causes an error.
 
-#scrapeRaw("2011/6/1")
+#scrapeRaw("2013/1/1")
 scrapeRaw(o$day)
 
 
-clean.ahram(dirname = "raw_2012_12_12-2016_10_31")
+#clean.ahram(dirname = "raw_2012_12_12-2016_10_31")
 
 
 
@@ -233,4 +195,49 @@ month.names<-format(month.dates, "%B")
 # my.yaml.loader <- function(day.to.load){
 #   my.filename<-paste("data/",paste(day.to.load),".yaml",sep="")
 #   return(as.data.frame(yaml.load_file(my.filename)))
+# }
+
+
+
+# 
+# 
+# scrapeAhramDay <- function(day.to.observe){
+#   base.ahram.url<- "http://www.ahram.org.eg/archive/"
+#   ahram.url<-"http://www.ahram.org.eg/archive/news/" # articles are saved one stage down. 
+#   
+#   my.filename<-paste("data/",paste(day.to.observe),".yaml",sep="")# the data-format fits the datastructure year/month/day
+#   
+#   if(!file.exists(my.filename)){
+#     
+#     ahram.day.url<-paste(ahram.url,day.to.observe,"/index.aspx",sep="")
+#     homepages.v<-getLinks(ahram.day.url,"div#ImpNewsDiv a")### div#TheMainTableDiv a
+#     cat("\nNow I'm scraping all of the (top) articles written on ",day.to.observe,".\n",sep="")
+#     titles.v<-NULL; abstract.v<-NULL; text.v<-NULL# initialize variables with NULL to omit overwriting of existing strings.
+#     
+#     for(i in 1:length(homepages.v)){
+#       
+#       #print(paste(base.ahram.url,homepages.v[i],sep="",collapse = ""))
+#       
+#       ahram.homepage <- read_html(paste(base.ahram.url,homepages.v[i],sep="",collapse = ""),encoding = "UTF-8") # encoding solves the encoding-issue
+#       
+#       titles.v[i]<-ahram.homepage %>% html_node("div#divtitle") %>% html_text() # get title
+#       # titles.v[i]<-gsub('/r||/n','',titles.v[i])
+#       abstract.v[i]<-ahram.homepage %>% html_node("div#abstractDiv") %>% html_text() #get the abstract
+#       text.v[i]<-ahram.homepage %>% html_node("div#txtBody.bbBodyp") %>% html_text() # get the text
+#       sleep(0.5)# ...be patient. this is going to take forever.
+#       
+#     }
+#     
+#     # @todo META-Data  # subtitle in span#txtSource.bbsubtitle
+#     
+#     my.df<-data.frame(rep("Ahram",length(homepages.v)),day.to.observe,titles.v,abstract.v,text.v)
+#     colnames(my.df)<- c("newspaper","date","title","abstract","article")
+#     
+#     
+#     # create dir if needed.
+#     dir.create(gsub('/..yaml','',my.filename), showWarnings = FALSE, recursive = TRUE) # extracting year/month from year/month/day
+#     # \r and \n still present. not a big problem, they can be removed with other stopwords.
+#     write(as.yaml(my.df),my.filename) #write.table(my.df,my.filename,sep="\t",quote = FALSE)
+#   } else    
+#   {   warning("skip this day.")   } 
 # }
