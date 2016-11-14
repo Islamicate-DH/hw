@@ -22,7 +22,7 @@ end
   (1..number_of_tafaseer_per_madhab[m-1]).each do |t|
     pattern = File.join(path, 'quran_???', 'aaya_???', "madhab_#{"%02d" % m}", "tafsir_#{"%02d" % t}.yml")
     files = Dir.glob(pattern).sort
-    files.each do |infile|
+    files.each_with_index do |infile,i|
       puts "#{infile}"
       @yaml = YAML.load(File.open(infile))
       header = []
@@ -48,7 +48,7 @@ end
           end
         end
         # Prepare format required by CSV
-        header << col
+        header << col if i == 0 # Only write a header into the first row!
         values << v
       end
       # Convert into CSV
