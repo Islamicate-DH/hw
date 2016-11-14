@@ -43,7 +43,7 @@ scrape.index<- function(day.links,target.folder){
 
 ### source folder ist hier irreführend
 scrape.day <- function(hespress.url) {
-  target.folder<-"~/Dokumente/islamicate2.0/hw/corpora/newspaper_archive/Hespress/hespress2014/"
+  target.folder<-"~/Downloads/hespress2016/" ##"~/Dokumente/islamicate2.0/hw/corpora/newspaper_archive/Hespress/hespress2015/"
     
   ## while there is still another index-page for the current day continue scraping.
   while (length(grep("index", hespress.url)) > 0) {
@@ -102,7 +102,7 @@ clean.hespress <- function(source.folder){
 
 ## First I set a time-sequence which I want to download. Here I chose 1 year.
 ## The function generates 365 date for each day (or more if you chose a larger intervall).
-days.to.scrape<-generateTimeSequence("2014/1/1","2014/12/31")
+days.to.scrape<-generateTimeSequence("2016/1/1","2016/10/31")
 hp.base<-"http://www.hespress.com/archive/"
 
 ## Here I generate the direct pages to the first index-page of the corresponding day.
@@ -114,13 +114,13 @@ days.to.scrape.url.v<-sapply(hp.base,paste,days.to.scrape,"/index.1.html",sep=""
 sapply(days.to.scrape.url.v, scrape.day)
 
 
-# option_list = list(
-#   make_option(
-#     c('-b', '--day'), 
-#     action='store', default=NA, type='character',
-#     help='Where to start downloading.')
-# ); o = parse_args(OptionParser(option_list=option_list))
-# 
-# scrape.day(o$day)
+option_list = list(
+  make_option(
+    c('-b', '--day'),
+    action='store', default=NA, type='character',
+    help='Where to start downloading.')
+); o = parse_args(OptionParser(option_list=option_list))
+
+#scrape.day(o$day)
 #source.folder<- "hespress2011"
 #clean.hespress(source.folder)
