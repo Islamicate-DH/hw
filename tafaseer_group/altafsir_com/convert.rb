@@ -18,6 +18,10 @@ def flat_hash(h,f=[],g={})
   g
 end
 
+def cts_csv_writeline(kv_hash)
+  return
+end
+
 (1..number_of_madahib).each do |m|
   (1..number_of_tafaseer_per_madhab[m-1]).each do |t|
     pattern = File.join(path, 'quran_???', 'aaya_???', "madhab_#{"%02d" % m}", "tafsir_#{"%02d" % t}.yml")
@@ -28,14 +32,16 @@ end
       header = []
       values = []
       outname = "%03d-%03d" % [m, t]
+      cts_csv = {}
       flat_hash(@yaml).each do |k,v|
         col = k.join('_')
-        # Convert into formats requiring just the one column
+        cts_csv[col] = v
+        # Write formats requiring just one column
         if col == 'text'
           %w{plain}.each do |format|
             case format
               when 'plain' then ext = 'txt'
-              when 'markdown' then ext = 'md'
+              when 'markdown' then ext = 'md' # Not really useful, as there is no Markdown info contained
               else ext = format
             end
             outpath = File.join(path, ext)
@@ -55,7 +61,7 @@ end
         header << col
         values << v
       end
-      # Convert into CSV
+      # Write CSV
       outpath = File.join(path, 'generic_csv')
       outfile = File.join(outpath, outname+'.csv')
       puts "\t>> #{outfile}"
@@ -67,6 +73,8 @@ end
         end
         csv << values
       end
+      # Take care of CTS CSV
+      cts_csv_writeline(cts_csv)
     end
   end
 end
