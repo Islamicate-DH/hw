@@ -22,7 +22,7 @@ end
   (1..number_of_tafaseer_per_madhab[m-1]).each do |t|
     pattern = File.join(path, 'quran_???', 'aaya_???', "madhab_#{"%02d" % m}", "tafsir_#{"%02d" % t}.yml")
     files = Dir.glob(pattern).sort
-    files.each_with_index do |infile,i|
+    files.each do |infile|
       puts "#{infile}"
       @yaml = YAML.load(File.open(infile))
       header = []
@@ -52,7 +52,7 @@ end
         # the CSV files must comply with CITE CTS. The specs are at
         # http://cite-architecture.github.io/ctsurn_spec/specification.html.
         # So the header and values variables are only for generic CSV.
-        header << col if i == 0 # Only write a header into the first row!
+        header << col
         values << v
       end
       # Convert into CSV
@@ -60,8 +60,11 @@ end
       outfile = File.join(outpath, outname+'.csv')
       puts "\t>> #{outfile}"
       FileUtils.mkdir_p(outpath)
-      CSV.open(outfile, 'ab') do |csv|
-        csv << header if csv.lineno == 0
+      CSV.open(outfile, 'ab') do |csv|  
+        if csv.lineno == 0
+          puts "Writing header."
+          csv << header
+        end
         csv << values
       end
     end
