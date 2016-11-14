@@ -47,12 +47,16 @@ end
             end
           end
         end
-        # Prepare format required by CSV
+        # Prepare format required by CSV. Note that for purposes of the DH
+        # Leipzig/Maryland/etc. research groups (be able to use To Pan, etc.)
+        # the CSV files must comply with CITE CTS. The specs are at
+        # http://cite-architecture.github.io/ctsurn_spec/specification.html.
+        # So the header and values variables are only for generic CSV.
         header << col if i == 0 # Only write a header into the first row!
         values << v
       end
       # Convert into CSV
-      outpath = File.join(path, 'csv')
+      outpath = File.join(path, 'generic_csv')
       outfile = File.join(outpath, outname+'.csv')
       puts "\t>> #{outfile}"
       FileUtils.mkdir_p(outpath)
