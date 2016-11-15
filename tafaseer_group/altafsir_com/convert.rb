@@ -4,6 +4,8 @@ require 'yaml'
 require 'csv'
 require 'pandoc-ruby'
 require 'fileutils'
+require 'pp'
+require_relative 'lib/asciiarabic'
 
 inpath  = File.join('..', '..', 'corpora', 'altafsir_com', 'processed', 'yaml')
 outpath = File.join('..', '..', 'corpora', 'altafsir_com', 'processed')
@@ -19,15 +21,51 @@ def flat_hash(h,f=[],g={})
   g
 end
 
-def cts_csv_writeline(kv_hash)
-  puts "cts_csv_writeline"
-  return
+def cts_csv_writeline(kv_hash, outpath, line, madhab, tafseer)
+  # kv_hash example:
+  #
+  # {"position_sura"=>1,
+  #  "position_aaya"=>1,
+  #  "position_madhab"=>1,
+  #  "position_tafsir"=>1,
+  #  "meta_title"=>"تفسير جامع البيان في تفسير القرآن",
+  #  "meta_author"=>"الطبري",
+  #  "meta_year"=>"310",
+  #  "aaya"=>"بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
+  #  "text"=>
+  #    "<section><p>القول فـي تأويـل { بِسْمِ }.
+  #
+  # CITE CTS URN example:
+  #
+  # urn:cts:arabLit:tafsir.author.work:1.2.1234
+  author = ASCIIArabic.translit(kv_hash['meta_author']) 
+  book   = ASCIIArabic.translit(kv_hash['meta_title'])
+  sura   = kv_hash['position_sura'].to_i
+  aaya   = kv_hash['position_aaya'].to_i
+  
+  urn = "urn:cts:arabLit:tafsir.#{author}.#{book}:#{sura}.#{aaya}.#{line}"
+  header = ['urn', 'text', 'aaya']
+  values = [urn, kv_hash['text'], kv_hash['aaya']]
+  outname = "%03d-%03d.csv" % [madhab, tafseer]
+
+  fulloutpath = File.join(outpath, 'csv')
+  outfile = File.join(fulloutpath, outname)
+  puts "\t>> #{outfile}"
+  FileUtils.mkdir_p(fulloutpath)
+  write_header = !(File.file?(outfile))
+  CSV.open(outfile, 'ab') do |csv|
+    if write_header
+      csv << header
+    end
+    csv << values
+  end
 end
 
 (1..number_of_madahib).each do |m|
   (1..number_of_tafaseer_per_madhab[m-1]).each do |t|
     pattern = File.join(inpath, 'sura_???', 'aaya_???', "madhab_#{"%02d" % m}", "tafsir_#{"%02d" % t}.yml")
     files = Dir.glob(pattern).sort
+    line = 0
     files.each do |infile|
       puts "#{infile}"
       @yaml = YAML.load(File.open(infile))
@@ -35,6 +73,7 @@ end
       values = []
       outname = "%03d-%03d" % [m, t]
       cts_csv = {}
+      line += 1
       flat_hash(@yaml).each do |k,v|
         col = k.join('_')
         cts_csv[col] = v
@@ -55,28 +94,12 @@ end
             end
           end
         end
-        # Prepare format required by CSV. Note that for purposes of the DH
-        # Leipzig/Maryland/etc. research groups (be able to use To Pan, etc.)
-        # the CSV files must comply with CITE CTS. The specs are at
-        # http://cite-architecture.github.io/ctsurn_spec/specification.html.
-        # So the header and values variables are only for generic CSV.
-        header << col
-        values << v
       end
-      # Write CSV
-      fulloutpath = File.join(outpath, 'generic_csv')
-      outfile = File.join(fulloutpath, outname+'.csv')
-      puts "\t>> #{outfile}"
-      FileUtils.mkdir_p(fulloutpath)
-      write_header = !(File.file?(outfile))
-      CSV.open(outfile, 'ab') do |csv|  
-        if write_header
-          csv << header
-        end
-        csv << values
-      end
-      # Take care of CTS CSV
-      cts_csv_writeline(cts_csv)
+      # Note that for purposes of the DH Leipzig/Maryland/etc. research 
+      # groups (be able to use To Pan, etc.) the CSV files must comply
+      # with CITE CTS. The specs are at
+      # http://cite-architecture.github.io/ctsurn_spec/specification.html.
+      cts_csv_writeline(cts_csv, outpath, line, m, t)
     end # files by sura and aaya
   end # tafaseer
 end # madahib
