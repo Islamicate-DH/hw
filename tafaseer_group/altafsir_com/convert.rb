@@ -5,7 +5,8 @@ require 'csv'
 require 'pandoc-ruby'
 require 'fileutils'
 
-path = File.join('..', '..', 'corpora', 'altafsir_com', 'processed')
+inpath  = File.join('..', '..', 'corpora', 'altafsir_com', 'processed', 'yaml')
+outpath = File.join('..', '..', 'corpora', 'altafsir_com', 'processed')
 
 number_of_madahib = 10
 number_of_suwar  = 114
@@ -19,12 +20,13 @@ def flat_hash(h,f=[],g={})
 end
 
 def cts_csv_writeline(kv_hash)
+  puts "cts_csv_writeline"
   return
 end
 
 (1..number_of_madahib).each do |m|
   (1..number_of_tafaseer_per_madhab[m-1]).each do |t|
-    pattern = File.join(path, 'quran_???', 'aaya_???', "madhab_#{"%02d" % m}", "tafsir_#{"%02d" % t}.yml")
+    pattern = File.join(inpath, 'sura_???', 'aaya_???', "madhab_#{"%02d" % m}", "tafsir_#{"%02d" % t}.yml")
     files = Dir.glob(pattern).sort
     files.each do |infile|
       puts "#{infile}"
@@ -44,10 +46,10 @@ end
               when 'markdown' then ext = 'md' # Not really useful, as there is no Markdown info contained
               else ext = format
             end
-            outpath = File.join(path, ext)
-            outfile = File.join(outpath, outname+'.'+ext)
+            fulloutpath = File.join(outpath, ext)
+            outfile = File.join(fulloutpath, outname+'.'+ext)
             puts "\t>> #{outfile}"
-            FileUtils.mkdir_p(outpath)
+            FileUtils.mkdir_p(fulloutpath)
             File.open(outfile, 'a') do |txt|
               txt.write PandocRuby.convert(v, from: :html, to: format)
             end
@@ -62,19 +64,19 @@ end
         values << v
       end
       # Write CSV
-      outpath = File.join(path, 'generic_csv')
-      outfile = File.join(outpath, outname+'.csv')
+      fulloutpath = File.join(outpath, 'generic_csv')
+      outfile = File.join(fulloutpath, outname+'.csv')
       puts "\t>> #{outfile}"
-      FileUtils.mkdir_p(outpath)
+      FileUtils.mkdir_p(fulloutpath)
+      write_header = !(File.file?(outfile))
       CSV.open(outfile, 'ab') do |csv|  
-        if csv.lineno == 0
-          puts "Writing header."
+        if write_header
           csv << header
         end
         csv << values
       end
       # Take care of CTS CSV
       cts_csv_writeline(cts_csv)
-    end
-  end
-end
+    end # files by sura and aaya
+  end # tafaseer
+end # madahib
