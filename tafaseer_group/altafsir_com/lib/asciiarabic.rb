@@ -1,62 +1,37 @@
+# Remember: every line of code one liability!
+# Usage example: `puts ASCIIArabic.translit('السلام عليكم')`
+
 class ASCIIArabic
-  def initialize(str_ara = String.new)
-    @str_ara = str_ara
+  def initialize(str_ara)
+    @arabic = str_ara || String.new
+    @replacements = [
+      # The Abjad
+      ['ا', 'a' ], ['ب', 'b' ], ['ت', 't' ], ['ث', 'th'], ['ج', 'j' ],
+      ['ح', 'H' ], ['خ', 'kh'], ['د', 'd' ], ['ذ', 'dh'], ['ر', 'r' ], 
+      ['ز', 'z' ], ['س', 's' ], ['ش', 'sh'], ['ص', 'S' ], ['ض', 'D' ],
+      ['ط', 'T' ], ['ظ', 'Z' ], ['ع', '3' ], ['غ', 'gh'], ['ف', 'f' ],
+      ['ق', 'q' ], ['ك', 'k' ], ['ل', 'l' ], ['م', 'm' ], ['ن', 'n' ],
+      ['ه', 'h' ], ['و', 'w' ], ['ي', 'y' ],
+      # Various forms of Hamza
+      ['ء', '2' ], ['أ', '2' ], ['آ', '2a'], ['ؤ', '2' ], ['ئ', '2' ],
+      ['ى', 'a' ], ['ة', 'a' ],
+      # Space
+      [' ', '_' ],
+      # Most important diacritica
+      ['َ', 'a'  ], ['ِ', 'i'  ], ['ُ', 'u'  ], ['ً', 'an' ], ['ٍ', 'in' ],
+      ['ٌ', 'un' ]
+    ]
   end
 
   def self.translit(str_ara)
     instance = self.new(str_ara)
-    return instance.translit(str_ara)
+    return instance.translit
   end
 
-  def translit(str_ara = String.new)
-    s = String.new
-    str_ara ||= String.new
-    str_ara.chars.map do |c|
-      case c
-      when 'ا' then s << 'a'
-      when 'ب' then s << 'b'
-      when 'ت' then s << 't'
-      when 'ث' then s << 'th'
-      when 'ج' then s << 'j'
-      when 'ح' then s << 'H'
-      when 'خ' then s << 'kh'
-      when 'د' then s << 'd'
-      when 'ذ' then s << 'dh'
-      when 'ر' then s << 'r'
-      when 'ز' then s << 'z'
-      when 'س' then s << 's'
-      when 'ش' then s << 'sh'
-      when 'ص' then s << 'S'
-      when 'ض' then s << 'D'
-      when 'ط' then s << 'T'
-      when 'ظ' then s << 'Z'
-      when 'ع' then s << '3'
-      when 'غ' then s << 'gh'
-      when 'ف' then s << 'f'
-      when 'ق' then s << 'q'
-      when 'ك' then s << 'k'
-      when 'ل' then s << 'l'
-      when 'م' then s << 'm'
-      when 'ن' then s << 'n'
-      when 'ه' then s << 'h'
-      when 'و' then s << 'w'
-      when 'ي' then s << 'y'
-      when 'ء' then s << '2'
-      when 'أ' then s << '2'
-      when 'آ' then s << '2a'
-      when 'ؤ' then s << '2'
-      when 'ئ' then s << '2'
-      when 'ى' then s << 'a'
-      when 'ة' then s << 'a'
-      when ' ' then s << '_'
-      when 'َ' then s << 'a'
-      when 'ِ' then s << 'i'
-      when 'ُ' then s << 'u'
-      when 'ً' then s << 'an'
-      when 'ٍ' then s << 'in'
-      when 'ٌ' then s << 'un'
-      end
+  def translit
+    @replacements.each do |needle, replacement|
+      @arabic.gsub!(needle, replacement)
     end
-    return s
+    @arabic.gsub!(/[^_[[:alnum:]]]/, '') # Only Latin script
   end
 end
