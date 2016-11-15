@@ -1,4 +1,9 @@
 # Remember: every line of code one liability!
+#
+# Synopsis: convert an Arabic string into a Latin script
+# string fit to be used as a filename while still being
+# somewhat decipherable.
+#
 # Usage example: `puts ASCIIArabic.translit('السلام عليكم')`
 
 class ASCIIArabic
