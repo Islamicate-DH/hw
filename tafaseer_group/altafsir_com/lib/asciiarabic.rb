@@ -2,7 +2,7 @@
 #
 # Synopsis: convert an Arabic string into a Latin script
 # string fit to be used as a filename while still being
-# somewhat decipherable.
+# somewhat decipherable. It's supposed to be primitive.
 #
 # Usage example: `puts ASCIIArabic.translit('السلام عليكم')`
 
@@ -19,6 +19,7 @@ class ASCIIArabic
       ['ه', 'h' ], ['و', 'w' ], ['ي', 'y' ],
       # Various forms of Hamza
       ['ء', '2' ], ['أ', '2' ], ['آ', '2a'], ['ؤ', '2' ], ['ئ', '2' ],
+      # Word-end forms of 'a'/'at'
       ['ى', 'a' ], ['ة', 'a' ],
       # Space
       [' ', '_' ],
