@@ -36,8 +36,8 @@ class ASCIIArabic
 
   def translit
     @replacements.each do |needle, replacement|
-      @latin = @arabic.gsub(needle, replacement)
+      @arabic = @arabic.gsub(needle, replacement)
     end
-    @latin.gsub(/[^_[[:alnum:]]]/, '') # Only Latin script
+    @arabic = @arabic.gsub(/[^_[[:alnum:]]]/, '') # Only Latin script
   end
 end
