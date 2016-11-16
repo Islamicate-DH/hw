@@ -24,8 +24,8 @@ class ASCIIArabic
       # Space
       [' ', '_' ],
       # Most important diacritica
-      ['َ', 'a'  ], ['ِ', 'i'  ], ['ُ', 'u'  ], ['ً', 'an' ], ['ٍ', 'in' ],
-      ['ٌ', 'un' ]
+      ['َ', 'a'  ], ['ِ', 'i'  ], ['ُ', 'u'  ],
+      ['ً', 'an' ], ['ٍ', 'in' ], ['ٌ', 'un' ]
     ]
   end
 
@@ -36,8 +36,8 @@ class ASCIIArabic
 
   def translit
     @replacements.each do |needle, replacement|
-      @arabic.gsub!(needle, replacement)
+      @latin = @arabic.gsub(needle, replacement)
     end
-    @arabic.gsub!(/[^_[[:alnum:]]]/, '') # Only Latin script
+    @latin.gsub(/[^_[[:alnum:]]]/, '') # Only Latin script
   end
 end
