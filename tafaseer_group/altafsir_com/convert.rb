@@ -4,6 +4,7 @@ require 'yaml'
 require 'csv'
 require 'pandoc-ruby'
 require 'fileutils'
+require 'sanitize'
 require 'pp'
 require_relative 'lib/asciiarabic'
 require_relative 'lib/flat_hash'
@@ -28,16 +29,25 @@ class AlTafsirYAMLFiles
     @hash = {}
     @yaml = ''
     @html = ''
-    @header = %{<!doctype html><html lang="ar" dir="rtl" style="display:flex;justify-content:center;"><head><meta charset="utf-8"><style type="text/css">\nh1 {font-size:120%;}\nh2 {font-size:100%;}\n</style></head><body style="width:50%;margin=1em 0;font-family:'Traditional Arabic';font-size:16pt;line-height:1.3;">\n}
-    @footer = %{</body></html>}
+    @header = %{<!doctype html>
+<html lang="ar" dir="rtl" style="display:flex;justify-content:center;">
+<head>
+<meta charset="utf-8">
+  <style type="text/css">
+    h1 {font-size:120%;}
+    h2 {font-size:100%;}
+  </style>
+</head>
+<body style="width:50%;margin=1em 0;font-family:'Traditional Arabic';font-size:16pt;line-height:1.3;">\n}
+    @footer = %{</body>\n</html>}
   end
 
-  def self.convert_to(formats = [:csv])
+  def self.convert_to(formats)
     instance = self.new
     instance.convert_to(formats)
   end
 
-  def convert_to(formats = [:csv])
+  def convert_to(formats)
     walk_tree__by_book(formats)
   end
 
@@ -63,20 +73,21 @@ class AlTafsirYAMLFiles
     sura   = @hash['position_sura'].to_i
     aaya   = @hash['position_aaya'].to_i
     # No need to continue if we don't have the full URN
-    return unless (!author.empty? && !book.empty?)
+    return if (author.empty? || book.empty?)
     urn = "urn:cts:arabLit:tafsir.#{author}.#{book}:#{sura}.#{aaya}.#{line_no}"
-    header = ['urn', 'text', 'aaya']
-    values = [urn, @hash['text'], @hash['aaya']]
     outname = "%03d-%03d.csv" % [madhab, tafseer]
     outpath = File.join(@outpath, 'csv', 'cts+aaya')
     outfile = File.join(outpath, outname)
     FileUtils.mkdir_p(outpath)
     write_header = !(File.file?(outfile))
+    header = ['urn', 'text', 'aaya']
+    values = [urn, @hash['text'], @hash['aaya']]
     CSV.open(outfile, 'ab') do |csv|
       if write_header
         csv << header
+      else
+        csv << values
       end
-      csv << values
     end
   end
 
@@ -97,13 +108,29 @@ class AlTafsirYAMLFiles
     outfile
   end
 
+  def plain_text_write(html_file, madhab, tafseer)
+    outname = "%03d-%03d.txt" % [madhab, tafseer]
+    outpath = File.join(@outpath, 'plain')
+    plain_file = File.join(outpath, outname)
+    FileUtils.mkdir_p(outpath)
+    File.open(plain_file, 'w') do |outfile|
+      print 'plain '
+        outfile.puts Sanitize.fragment(@html, {
+          whitespace_elements: {
+            'h1':      { before: "\n",   after: "\n\n" },
+            'h2':      { before: "\n",   after: "\n"   },
+            'section': { before: "\n\n", after: "\n"   },
+            'p':       { before: "\n",   after: "\n"   }
+        }})
+    end
+  end
+
   def other_formats_write(infile, madhab, tafseer, formats)
     outname = "%03d-%03d" % [madhab, tafseer]
-    %w{csv html5}.each {|f| formats.delete(f)}
+    fs = formats; %w{csv plain html5}.each {|f| fs.delete(f)}
     formats.each do |format|
       print "#{format} "
       case format
-        when 'plain'    then ext = 'txt'
         when 'markdown' then ext = 'md'
         when 'latex'    then ext = 'tex'
         else ext = format
@@ -119,11 +146,14 @@ class AlTafsirYAMLFiles
 
   def walk_tree__by_book(formats)
     otherformats = formats.any? {|x| x != 'csv'}
+    plain = formats.include?('plain')
+    csv = formats.include?('csv')
     puts "Writing books:"
     (1..@number_of_madahib).each do |m|
       (1..@number_of_tafaseer_per_madhab[m-1]).each do |t|
         t0 = Time.now
-        print "  madhab #{m}, tafseer #{t} csv "
+        print "  madhab #{m}, tafseer #{t} "
+        print 'csv ' if csv 
         pattern = File.join(@inpath, 'sura_???', 'aaya_???', "madhab_#{"%02d" % m}", "tafsir_#{"%02d" % t}.yml")
         files = Dir.glob(pattern).sort
         @html = '' # Wipe last BOOK's data
@@ -140,10 +170,12 @@ class AlTafsirYAMLFiles
           # groups (be able to use To Pan, etc.) the CSV files must comply
           # with CITE CTS. The specs are at
           # http://cite-architecture.github.io/ctsurn_spec/specification.html.
-          cts_csv_writeline(m, t, i) if formats.include?('csv')
+          cts_csv_writeline(m, t, i) if csv 
           html5_addline if otherformats
         end # sura, aaya
-        other_formats_write(html5_write(m, t), m, t, formats) if otherformats
+        html_file = html5_write(m, t)
+        plain_text_write(html_file, m, t) if plain 
+        other_formats_write(html_file, m, t, formats) if otherformats
         puts "(%s files, %ss)" % [i, (Time.now-t0).round(1)]
       end # tafaseer
     end # madahib
