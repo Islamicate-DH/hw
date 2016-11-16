@@ -36,6 +36,9 @@ class AlTafsirYAMLFiles
   <style type="text/css">
     h1 {font-size:120%;}
     h2 {font-size:100%;}
+    p.quran {color:#0E4E00;}
+    p.hadith {color:#225F6B;}
+    p.poetry_or_grammar {color:#671F10;}
   </style>
 </head>
 <body style="width:50%;margin=1em 0;font-family:'Traditional Arabic';font-size:16pt;line-height:1.3;">\n}

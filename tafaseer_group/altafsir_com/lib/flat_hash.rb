@@ -1,4 +1,4 @@
-#!/usr/bin/env ruby
+# Remember: every line of code one liability!
 
 def flat_hash(h,f=[],g={})
   return g.update({ f=>h }) unless h.is_a? Hash
