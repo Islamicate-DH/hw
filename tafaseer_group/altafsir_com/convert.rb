@@ -58,7 +58,7 @@ class AlTafsirYAMLFiles
     # CITE CTS URN example:
     #
     # urn:cts:arabLit:tafsir.author.work:1.2.1234
-    author = ASCIIArabic.translit(@hash['meta_author']) 
+    author = ASCIIArabic.translit(@hash['meta_author'])
     book   = ASCIIArabic.translit(@hash['meta_title'])
     sura   = @hash['position_sura'].to_i
     aaya   = @hash['position_aaya'].to_i
@@ -90,9 +90,11 @@ class AlTafsirYAMLFiles
     outname = "%03d-%03d.html" % [madhab, tafseer]
     outpath = File.join(@outpath, 'html5')
     outfile = File.join(outpath, outname)
-    FileUtils.mkdir_p(outpath)
-    File.write(outfile, @header+@html+@footer)
-    return outfile
+    unless File.file?(outfile)
+      FileUtils.mkdir_p(outpath)
+      File.write(outfile, @header+@html+@footer)
+    end
+    outfile
   end
 
   def other_formats_write(infile, madhab, tafseer, formats)
@@ -139,13 +141,11 @@ class AlTafsirYAMLFiles
           # with CITE CTS. The specs are at
           # http://cite-architecture.github.io/ctsurn_spec/specification.html.
           cts_csv_writeline(m, t, i) if formats.include?('csv')
-          html5_addline if otherformats 
+          html5_addline if otherformats
         end # sura, aaya
         other_formats_write(html5_write(m, t), m, t, formats) if otherformats
         puts "(%s files, %ss)" % [i, (Time.now-t0).round(1)]
-        break
       end # tafaseer
-      break
     end # madahib
   end
 end
