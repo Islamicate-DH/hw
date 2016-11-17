@@ -94,12 +94,16 @@ class AlTafsirYAMLFiles
     end
   end
 
+  def cts_csv_nohtml_writeline(madhab, tafseer, line_no)
+    # TODO: Implement
+  end
+
   def html5_addline
     @html += "<h1>#{@hash['meta_title']} ل#{@hash['meta_author']} (ت. #{@hash['meta_year'].to_i.to_hindi})</h1>" if @html.empty?
     @html += "<h2 class='quran'>#{@hash['aaya']}</h2>\n#{@hash['text']}\n"
   end
 
-  def html5_write(madhab, tafseer)
+  def html5_write_unless_exists(madhab, tafseer)
     print 'html5 '
     outname = "%03d-%03d.html" % [madhab, tafseer]
     outpath = File.join(@outpath, 'html5')
@@ -151,6 +155,7 @@ class AlTafsirYAMLFiles
     otherformats = formats.any? {|x| x != 'csv'}
     plain = formats.include?('plain')
     csv = formats.include?('csv')
+    csv_nohtml = formats.include?('csv_nohtml')
     puts "Writing books:"
     (1..@number_of_madahib).each do |m|
       (1..@number_of_tafaseer_per_madhab[m-1]).each do |t|
@@ -173,10 +178,11 @@ class AlTafsirYAMLFiles
           # groups (be able to use To Pan, etc.) the CSV files must comply
           # with CITE CTS. The specs are at
           # http://cite-architecture.github.io/ctsurn_spec/specification.html.
-          cts_csv_writeline(m, t, i) if csv 
+          cts_csv_writeline(m, t, i) if csv
+          cts_csv_nohtml_writeline(m, t, i) if csv_nohtml
           html5_addline if otherformats
         end # sura, aaya
-        html_file = html5_write(m, t)
+        html_file = html5_write_unless_exists(m, t)
         plain_text_write(html_file, m, t) if plain 
         other_formats_write(html_file, m, t, formats) if otherformats
         puts "(%s files, %ss)" % [i, (Time.now-t0).round(1)]
@@ -186,4 +192,4 @@ class AlTafsirYAMLFiles
 end
 
 # Add/Remove formats as desired (see pandoc help for available ones)
-AlTafsirYAMLFiles.convert_to(%w{csv html5 plain}) # plain latex docx})
+AlTafsirYAMLFiles.convert_to(%w{csv_nothtml}) # html5 csv plain latex docx})
