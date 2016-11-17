@@ -1,0 +1,6 @@
+scrapeR.R	functions used for scraping
+	call them e.g. by scrape.day.hespress(...)
+cleanR.R	functions used for transfering HTML to csv
+	call them e.g. by clean.hespress(...)
+
+the functions are being called from the files hespress.R etc.
