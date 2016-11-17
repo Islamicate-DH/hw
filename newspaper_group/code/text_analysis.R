@@ -62,7 +62,7 @@ dtms <- removeSparseTerms(dtm, 0.1) # This makes a matrix that is 10% empty spac
 
 freq[tail(ord)]   ## most frequ words
 
-
+### some nice bar-diagram (didn't work yet)
 
 #wf <- data.frame(word=names(freq), freq=freq)   
 # head(wf)
