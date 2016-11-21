@@ -10,7 +10,7 @@
 
 title: An Exploratory Data Analysis of 18 Tafasīr From the Early 8th to the Late 14th
   Century and Across a Wide Geographical Area Using Corpus Linguistical Methods
-author: "F. Blunck, S. Bukhari, T. D. Keppen, J. R. Schmid"
+author: "F. Blunck, S. Bukhari, M. Foradi, T. D. Keppen, J. R. Schmid"
 output:
   pdf_document:
     toc: yes
