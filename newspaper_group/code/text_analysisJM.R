@@ -24,33 +24,34 @@ library(wordcloud)
 
 ### an alternative way to load data
 ## you have to set header=FALSE
-filename<-"/home/tobias/Dropbox/Dokumente/islamicate2.0/AlWatan/alwatan.csv"##"alwatan2011.500lines.csv"
+filename<-"/home/tobias/Dropbox/Dokumente/islamicate2.0/reducedfiles/alwatan_stem_tr.csv"
+base_corpus <- read.table(filename, sep=",", header=FALSE,encoding = "UTF-8",stringsAsFactors = F)
+
 data <- read.csv(filename, encoding = "UTF-8",sep = ",",header = FALSE,stringsAsFactors=F)
 
 ### some additional cleaning.
 
-data[,4] <- gsub("[[:punct:]]", " ", data[,4])  # replace punctuation with space
-data[,4] <- gsub("[[:cntrl:]]", " ", data[,4])  # replace control characters with space
-data[,4] <- gsub("^[[:space:]]+", "", data[,4]) # remove whitespace at beginning of documents
-data[,4] <- gsub("[[:space:]]+$", "", data[,4]) # remove whitespace at end of documents
-data[,4] <- gsub("[0-9]", "", data[,4]) #remove numbers
-data[,4]<- gsub("[:alpha:]","", data[,4])
+data[,2] <- gsub("[[:punct:]]", " ", data[,2])  # replace punctuation with space
+# data[,2] <- gsub("[[:cntrl:]]", " ", data[,2])  # replace control characters with space
+# data[,2] <- gsub("^[[:space:]]+", "", data[,2]) # remove whitespace at beginning of documents
+# data[,2] <- gsub("[[:space:]]+$", "", data[,2]) # remove whitespace at end of documents
+# data[,2] <- gsub("[0-9]", "", data[,2]) #remove numbers
+# data[,2]<- gsub("[:alpha:]","", data[,2])
 
-my.input.data<-data.frame(data[,4],stringsAsFactors = F)
+my.input.data<-data.frame(data[,2],stringsAsFactors = F)
 
-
-
-stop.words<-scan(file="/home/tobias/Downloads/stopwords_ar.txt",what = "", sep="\n",encoding = "UTF-8")
+stop_words<-scan(file="/home/tobias/Dokumente/islamicate2.0/hw/newspaper_group/stopwords_ar_tr.txt",what = "", sep="\n",encoding = "UTF-8")
+# stop.words<-scan(file="/home/tobias/Downloads/stopwords_ar.txt",what = "", sep="\n",encoding = "UTF-8")
 stop.words<-paste(stop.words,collapse = " ")
 
 
 docs <- Corpus(DataframeSource(data.frame(as.character(my.input.data))))
 
-docs <- tm_map(docs, removeWords, stop.words)## doesn't seem to work
+docs <- tm_map(docs, removeWords, stop_words)## doesn't seem to work
 docs <- tm_map(docs, stripWhitespace)
 docs <- tm_map(docs, PlainTextDocument)   ###
 dtm <- DocumentTermMatrix(docs)
-dtms <- removeSparseTerms(dtm, 0.1)
+#dtms <- removeSparseTerms(dtm, 0.1)
 #inspect(dtms)
 
 # freq <- sort(colSums(as.matrix(dtm)), decreasing=TRUE)
@@ -63,7 +64,7 @@ freq[tail(ord)]   ## most frequ words
 
 
 set.seed(124)   
-png("/home/tobias/Dokumente/islamicate2.0/hw/newspaper_group/pics/alwatan.png", width=1280,height=800)
+png("/home/tobias/Dokumente/islamicate2.0/hw/newspaper_group/pics/alwatan_tr.png", width=1280,height=800)
 pal2 <- brewer.pal(8,"Dark2")
 # wordcloud(names(freq), freq, max.words=100)   
 
@@ -71,10 +72,11 @@ wordcloud(names(freq),  freq,scale=c(8,1),max.words = 100
          ,colors=pal2)
 dev.off()
 
-### first transliterate stop-words and text -> then remove stopwords
-# stop.words.transliterated<-stem(stop.words, cleanChars = TRUE, cleanLatinChars = TRUE, transliteration = TRUE, returnStemList = FALSE)
-# text.c<-stem(my.input.data[], cleanChars = TRUE, cleanLatinChars = TRUE, transliteration = TRUE, returnStemList = FALSE)
-# stem(head(data[,4]), cleanChars = TRUE, cleanLatinChars = TRUE, transliteration = FALSE, returnStemList = FALSE)
 
-#my.input.data<-removeWords(as.character(my.input.data[,1]), stop.words)
 
+#write.csv(data.frame(names(freq),freq, stringsAsFactors=F),col.names = FALSE,row.names = FALSE,"/home/tobias/Dropbox/Dokumente/islamicate2.0/AlWatan/mfw.csv",sep = ",", quote = F,fileEncoding = "UTF-8",append = F)
+
+
+# ret<-reverse.transliterate(names(freq[1:1000]))
+# ret<-sapply(names(freq),reverse.transliterate)
+# ret<-tail(ret)

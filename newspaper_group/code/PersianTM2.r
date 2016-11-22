@@ -140,24 +140,24 @@ parsing <- function(x){
 }
 
 # Read corpus
+# 
+# # base_corpus <- read.table("sanai.csv", sep="\t", header=FALSE)
+# first_corpus <- read.table("sanai.csv", sep="\t", header=FALSE)
+# second_corpus <- read.table("anvari.csv", sep="\t", header=FALSE)
+# third_corpus <- read.table("attar.csv", sep="\t", header=FALSE)
+# fourth_corpus <- read.table("khaghani.csv", sep="\t", header=FALSE)
+# 
+# output_names <- c(as.character(first_corpus[,1]),
+#                   as.character(second_corpus[,1]),
+#                   as.character(third_corpus[,1]),
+#                   as.character(fourth_corpus[,1]))
+# 
+# research_corpus <- c(as.character(first_corpus[,7]),
+#                      as.character(second_corpus[,7]),
+#                      as.character(third_corpus[,7]),
+#                      as.character(fourth_corpus[,7]))
 
-# base_corpus <- read.table("sanai.csv", sep="\t", header=FALSE)
-first_corpus <- read.table("sanai.csv", sep="\t", header=FALSE)
-second_corpus <- read.table("anvari.csv", sep="\t", header=FALSE)
-third_corpus <- read.table("attar.csv", sep="\t", header=FALSE)
-fourth_corpus <- read.table("khaghani.csv", sep="\t", header=FALSE)
-
-output_names <- c(as.character(first_corpus[,1]),
-                  as.character(second_corpus[,1]),
-                  as.character(third_corpus[,1]),
-                  as.character(fourth_corpus[,1]))
-
-research_corpus <- c(as.character(first_corpus[,7]),
-                     as.character(second_corpus[,7]),
-                     as.character(third_corpus[,7]),
-                     as.character(fourth_corpus[,7]))
-
- base_corpus <- read.table("/home/tobias/Dokumente/2011_01_01-2012_12_11.csv", sep=",", header=FALSE,encoding = "UTF-8")
+ base_corpus <- read.table("/home/tobias/Dropbox/Dokumente/islamicate2.0/reducedfiles/ahram.csv", sep=",", header=FALSE,encoding = "UTF-8",stringsAsFactors = F)
 
 research_corpus <- as.character(base_corpus$V2)
  output_names <- as.character(base_corpus$V1)
@@ -185,17 +185,18 @@ t1 <- Sys.time()
 all_words <- unlist(doc.list)
 corpus_words <- unique(all_words)
 corpus_words <- sort(corpus_words)
+corpus_words<-corpus_words[corpus_words!=""]
 
 ## stemming
 
-corpus_words_sample <- sample(1:length(corpus_words), 100)
-stem_dictionary <- sapply(corpus_words[corpus_words_sample], parsing)
-
-   NumberOfForms <- max(unique(sapply(stem_dictionary, length)))
-number_lemmata <- sapply(stem_dictionary, length)
-
-t2 <- Sys.time()
-time_stemming <- t2 - t1
+# corpus_words_sample <- sample(1:length(corpus_words), 100)
+# stem_dictionary <- sapply(corpus_words[corpus_words_sample], parsing)
+# 
+#    NumberOfForms <- max(unique(sapply(stem_dictionary, length)))
+# number_lemmata <- sapply(stem_dictionary, length)
+# 
+# t2 <- Sys.time()
+# time_stemming <- t2 - t1
 
 # compute the table of terms:
 term.table <- table(all_words)
@@ -203,14 +204,17 @@ term.table <- sort(term.table, decreasing = TRUE)
 
 # determing stopwords
 
-stopword_corpus <- read.table("corpus.csv", sep="\t", header=FALSE)
-
-stopword_corpus <- c(as.character(stopword_corpus[,7]))
-stopword_corpus <- gsub("[[:punct:]]", " ", stopword_corpus)  # replace punctuation with space
-stopword_corpus <- gsub("[[:cntrl:]]", " ", stopword_corpus)  # replace control characters with space
-stopword_corpus <- gsub("^[[:space:]]+", "", stopword_corpus) # remove whitespace at beginning of documents
-stopword_corpus <- gsub("[[:space:]]+$", "", stopword_corpus) # remove whitespace at end of documents
-stopword_corpus <- gsub("[0-9]", "", stopword_corpus) #remove numbers
+stop_words<-scan(file="/home/tobias/Dokumente/islamicate2.0/hw/newspaper_group/stopwords_ar.txt",what = "", sep="\n",encoding = "UTF-8")
+stop_words<-paste(stop.words,collapse = " ")
+# 
+# stopword_corpus <- read.table("corpus.csv", sep="\t", header=FALSE)
+# 
+# stopword_corpus <- c(as.character(stopword_corpus[,7]))
+# stopword_corpus <- gsub("[[:punct:]]", " ", stopword_corpus)  # replace punctuation with space
+# stopword_corpus <- gsub("[[:cntrl:]]", " ", stopword_corpus)  # replace control characters with space
+# stopword_corpus <- gsub("^[[:space:]]+", "", stopword_corpus) # remove whitespace at beginning of documents
+# stopword_corpus <- gsub("[[:space:]]+$", "", stopword_corpus) # remove whitespace at end of documents
+# stopword_corpus <- gsub("[0-9]", "", stopword_corpus) #remove numbers
 
 # tokenize stopword_corpus on space and output as a list:
 doc.list2 <- strsplit(stopword_corpus, "[[:space:]]+")
@@ -227,9 +231,11 @@ stop_words <- stop_words [! stop_words %in% remove_from_sw]
 
 # remove terms that are stop words or occur fewer than "occurenses" times:
 occurences <- 5
-del <- names(term.table) %in% stop_words | term.table < occurences
+
+del <- names(term.table) %in% stop_words | term.table < occurences 
 term.table <- term.table[!del]
 vocab <- names(term.table)
+#vocab=vocab[which(vocab=="")]
 
 # now put the documents into the format required by the lda package:
 get.terms <- function(x) {
@@ -249,6 +255,9 @@ term.frequency <- as.integer(term.table)  # frequencies of terms in the corpus [
 # Fit the model:
 set.seed(seed)
 t1 <- Sys.time()
+G=10
+
+
 fit <- lda.collapsed.gibbs.sampler(documents = documents, K = K, vocab = vocab, 
                                    num.iterations = G, alpha = alpha, 
                                    eta = eta, initial = NULL, burnin = 0,
@@ -278,11 +287,11 @@ json <- createJSON(phi = research_corpusAbstracts$phi,
                    R=terms_shown)
 
 #Visulise and start browser
-serVis(json, out.dir = 'PERSIAN_vis', open.browser = FALSE)
+serVi s(json, out.dir = 'ahram', open.browser = FALSE)
 
 ## get the tables
 
-dir.create("Persian_tab")
+dir.create("ahram")
 
 # names(head(sort(phi.frame[,1], decreasing = TRUE)))
 

@@ -101,36 +101,39 @@ scrape.day.thawra<- function(day.homepage.url){
 ###############################################################################
 
 scrape.day.ahram<- function(day.to.observe){
-  target.folder<- "~/Dokumente/islamicate2.0/hw/corpora/newspaper_archive/Aharam/2013"
+  target.folder<- "~/Downloads/ahram"
   base.ahram.url<- "http://www.ahram.org.eg/archive/"
   ahram.url<-"http://www.ahram.org.eg/archive/news/" # articles are saved one stage down. 
   
   ahram.day.url<-paste(ahram.url,day.to.observe,"/index.aspx",sep="")
-  
+
   homepages.rel.v<-getLinks(ahram.day.url,"a")
+
   homepages.v<-filter_homepages.ahram(homepages.rel.v)# also prepends http
-  
+
   homepages.v<-homepages.v[grep("*[0-9].aspx$", homepages.v)]# i'm only interested in the articles
-  
-  homepages.rel.v<- gsub("/", "_", homepages.rel.v)
+  print(homepages.v)
+  homepages.names.v<- gsub("/", "_", homepages.v)
   for(i in 1:length(homepages.v)){
     
     # to avoid the duplicate issue. also resulting in http:__ (not very relevant)
-    my.filename <- paste(target.folder, gsub("/", "_", homepages.rel.v[i]), sep = "/")
-    print(my.filename)
-    if(!file.exists(my.filename)){
-      
-      tryCatch({
-        ahram.homepage<-read_html(homepages.v[i],encoding = "UTF-8")
-        write_xml(ahram.homepage,my.filename)
-        
-        sleep(0.1)}
-        ,error = function(e){
-          write(homepages.v[i],paste(target.folder,'log',sep=""),append = TRUE)
-        })
-      
-    }# end of file.exists
-    else{print(paste("skip",homepages.v[i],"because i have it already.",sep=" "))}
+    my.filename <- paste(target.folder, gsub("/", "_", homepages.names.v[i]), sep = "/")
+    #print(my.filename)
+     if(!file.exists(my.filename)){
+    # 
+       tryCatch({
+         ahram.homepage<-read_html(homepages.v[i],encoding = "UTF-8")
+         write_xml(ahram.homepage,my.filename)
+    # 
+         sleep(0.1)}
+         ,error = function(e){
+           print("something went wrong while downloading.")
+    #       #write(homepages.v[i],paste(target.folder,'/log',sep=""),append = TRUE)
+         })
+    # 
+     } else{
+        print(paste("skip",homepages.v[i],"because i have it already.",sep=" "))
+        }# end of file.exists
   }# end of for-loop
 } # end of scrapeRaw-function
 

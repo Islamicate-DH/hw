@@ -7,6 +7,6 @@ for(i in 1:length(libs)){
 source("scrapeR.R")
 source("cleanR.R")
 
-source.folder<-"/home/tobias/Downloads/almasryalyoum/2011"
+source.folder<-"/home/tobias/Downloads/almasryalyoum/2010"
 clean.almasryalyoum(source.folder)
 

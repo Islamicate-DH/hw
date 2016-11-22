@@ -38,7 +38,7 @@ clean.almasryalyoum <- function(source.folder){
       
       
       ## since all homepages look the same I can skip the if-statements (cf. al-watan.R)
-      write.table(data.frame(i,sub("\"","",text.c),gsub("\"","",title.c)),col.names = FALSE,row.names = FALSE,paste(source.folder,".csv",sep=""),sep = ",",fileEncoding = "UTF-8",append = T)
+      write.table(data.frame(i,sub("\"","",text.c),gsub("\"","",title.c)),col.names = FALSE,row.names = FALSE,paste(source.folder,".csv",sep=""),sep = ",",quote = "",fileEncoding = "UTF-8",append = T)
       i<-i+1
     },error =function(e){write(paste("page",my.filename,"could not be loaded",sep=" "),"log",append = TRUE )})
     
@@ -53,9 +53,10 @@ clean.almasryalyoum <- function(source.folder){
 ##                              AHRAM
 ###############################################################################
 
-clean.ahram<- function(){
-  my.filename<-paste(dirname,".csv",sep = "")
+clean.ahram<- function(dirname){
   
+  my.filename<-paste(dirname,".csv",sep = "")
+  print(my.filename)
   for(my.file in dir(dirname,pattern = "*.aspx")){
     
     tryCatch({
