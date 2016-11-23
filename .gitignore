@@ -4,3 +4,6 @@ corpora/*
 *.html
 *.pdf
 *.rds
+*.xls
+*.xlsx
+*.ods
