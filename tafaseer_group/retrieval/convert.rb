@@ -54,7 +54,7 @@ class AlTafsirYAMLFiles
     walk_tree__by_book(formats)
   end
 
-  def cts_csv_writeline(madhab, tafseer, line_no)
+  def cts_csv_writeline(madhab, tafseer, line_no, opts = {arabic_only: false})
     # @hash contents example:
     #
     # {"position_sura"=>1,
@@ -79,12 +79,20 @@ class AlTafsirYAMLFiles
     return if (author.empty? || book.empty?)
     urn = "urn:cts:arabLit:tafsir.#{author}.#{book}:#{sura}.#{aaya}.#{line_no}"
     outname = "%03d-%03d.csv" % [madhab, tafseer]
-    outpath = File.join(@outpath, 'csv', 'cts+aaya')
+    if opts[:arabic_only]
+      outpath = File.join(@outpath, 'csv', 'cts+aaya_nospecialchars')
+    else
+      outpath = File.join(@outpath, 'csv', 'cts+aaya')
+    end
     outfile = File.join(outpath, outname)
     FileUtils.mkdir_p(outpath)
     write_header = !(File.file?(outfile))
     header = ['urn', 'text', 'aaya']
-    values = [urn, @hash['text'], @hash['aaya']]
+    if opts[:arabic_only]
+      values = [urn, @hash['text'].match(/[\h\p{Arabic}]/).gsub(/\s\s+/, ' '), @hash['aaya']]
+    else
+      values = [urn, @hash['text'], @hash['aaya']]
+    end
     CSV.open(outfile, 'ab') do |csv|
       if write_header
         csv << header
@@ -99,7 +107,7 @@ class AlTafsirYAMLFiles
     @html += "<h2 class='quran'>#{@hash['aaya']}</h2>\n#{@hash['text']}\n"
   end
 
-  def html5_write(madhab, tafseer)
+  def html5_write_unless_exists(madhab, tafseer)
     print 'html5 '
     outname = "%03d-%03d.html" % [madhab, tafseer]
     outpath = File.join(@outpath, 'html5')
@@ -151,6 +159,7 @@ class AlTafsirYAMLFiles
     otherformats = formats.any? {|x| x != 'csv'}
     plain = formats.include?('plain')
     csv = formats.include?('csv')
+    csv_nospecialchars = formats.include?('csv_nospecialchars')
     puts "Writing books:"
     (1..@number_of_madahib).each do |m|
       (1..@number_of_tafaseer_per_madhab[m-1]).each do |t|
@@ -173,10 +182,11 @@ class AlTafsirYAMLFiles
           # groups (be able to use To Pan, etc.) the CSV files must comply
           # with CITE CTS. The specs are at
           # http://cite-architecture.github.io/ctsurn_spec/specification.html.
-          cts_csv_writeline(m, t, i) if csv 
+          cts_csv_writeline(m, t, i) if csv
+          cts_csv_writeline(m, t, i, {arabic_only: true}) if csv_nospecialchars
           html5_addline if otherformats
         end # sura, aaya
-        html_file = html5_write(m, t)
+        html_file = html5_write_unless_exists(m, t)
         plain_text_write(html_file, m, t) if plain 
         other_formats_write(html_file, m, t, formats) if otherformats
         puts "(%s files, %ss)" % [i, (Time.now-t0).round(1)]
@@ -186,4 +196,4 @@ class AlTafsirYAMLFiles
 end
 
 # Add/Remove formats as desired (see pandoc help for available ones)
-AlTafsirYAMLFiles.convert_to(%w{csv html5 plain}) # plain latex docx})
+AlTafsirYAMLFiles.convert_to(%w{csv_nospecialchars}) # html5 csv plain latex docx})
