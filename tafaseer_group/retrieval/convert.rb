@@ -100,6 +100,9 @@ class AlTafsirYAMLFiles
     end
   end
 
+  def cts_sqlite_writeline(madhab, tafseer, line)
+  end
+
   def html5_addline
     @html += "<h1>#{@hash['meta_title']} ل#{@hash['meta_author']} (ت. #{@hash['meta_year'].to_i.to_hindi})</h1>" if @html.empty?
     @html += "<h2 class='quran'>#{@hash['aaya']}</h2>\n#{@hash['text']}\n"
@@ -157,6 +160,7 @@ class AlTafsirYAMLFiles
     otherformats = formats.any? {|x| (x != 'csv' && x != 'csv_nospecialchars')}
     plain = formats.include?('plain')
     csv = formats.include?('csv')
+    sqlite = formats.include?('sqlite')
     csv_nospecialchars = formats.include?('csv_nospecialchars')
     puts "Writing books:"
     (1..@number_of_madahib).each do |m|
@@ -164,6 +168,7 @@ class AlTafsirYAMLFiles
         t0 = Time.now
         print "  madhab #{m}, tafseer #{t} "
         print 'csv ' if csv || csv_nospecialchars
+        print 'sqlite ' if sqlite
         pattern = File.join(@inpath, 'sura_???', 'aaya_???', "madhab_#{"%02d" % m}", "tafsir_#{"%02d" % t}.yml")
         files = Dir.glob(pattern).sort
         @html = '' # Wipe last BOOK's data
@@ -181,6 +186,8 @@ class AlTafsirYAMLFiles
           # with CITE CTS. The specs are at
           # http://cite-architecture.github.io/ctsurn_spec/specification.html.
           cts_csv_writeline(m, t, i) if csv
+          cts_sqlite_writeline(m, t, i) if sqlite
+          exit
           cts_csv_writeline(m, t, i, {nospecialchars: true}) if csv_nospecialchars
           html5_addline if otherformats
         end # sura, aaya
@@ -194,4 +201,4 @@ class AlTafsirYAMLFiles
 end
 
 # Add/Remove formats as desired (see pandoc help for available ones)
-AlTafsirYAMLFiles.convert_to(%w{csv_nospecialchars}) # html5 csv plain latex docx})
+AlTafsirYAMLFiles.convert_to(%w{sqlite}) # csv_nospecialchars html5 csv plain latex docx
