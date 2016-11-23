@@ -1,0 +1,17 @@
+## How to scrape with wget:
+
+
+0)	Don't download into the git-folder. Just copy the folders and download into a local dir. 
+
+1)	Change the working directory to the folder to which you want to download something. 
+	E.g. cd ~/Documents/almasryalyoum/2014
+
+2) 	Scrape the year. Don't forget to change the input file (here: ../urls_2014.txt)
+	The process will start in the background and prompt a process id, in case you want to 'kill it' or access it in any kind.
+	The output is written to the logfile. If you don't want to run wget in the background you can remove the '&' at the end of the
+	command.
+
+	wget -i ../urls_2014.txt -t 45 -w 1 --random-wait -nc -e robots=off  --limit-rate=100k --output-file=../logfile &
+
+3)	If you want, you can calculate the appr. time it will take at:
+	https://2ip.tools/en/services/useful-service/time-calculator
