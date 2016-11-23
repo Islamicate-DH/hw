@@ -1,14 +1,9 @@
 library(tm)
-
 library(topicmodels)
 
-filenames <- dir()
-
+filenames <- dir() # TODO: ask thom where he had this running? the txt folder?
 files <- lapply(filenames,readLines)
-
 docs <- Corpus(VectorSource(files))
-
-
 
 #Create document-term matrix-Takes awhile
 dtm <- DocumentTermMatrix(docs)
@@ -22,16 +17,16 @@ length(freq)
 ord <- order(freq,decreasing=TRUE)
 #List all terms in decreasing order of freq and write to disk
 freq[ord]
-write.csv(freq[ord], "word_freq.csv”)
+write.csv(freq[ord], "word_freq.csv")
 
+#parameters
 burnin <- 4000
 iter <- 2000
 thin <- 500
 seed <-list(2003,5,63,100001,765)
 nstart <- 5
 best <- TRUE
-
-k <- 18
+k <- 18 # number of works
 
 ldaOut <-LDA(dtm,k, method= "Gibbs" , control=list(nstart=nstart, seed = seed, best=best, burnin = burnin, iter = iter, thin=thin))
 
@@ -59,5 +54,3 @@ sort(topicProbabilities[x,])[k-1]/sort(topicProbabilities[x,])[k-2])
 #write to file
 write.csv(topic1ToTopic2,file=paste("LDAGibbs",k,"Topic1ToTopic2.csv"))
 write.csv(topic2ToTopic3,file=paste("LDAGibbs",k,"Topic2ToTopic3.csv"))
-
-
