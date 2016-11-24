@@ -6,9 +6,35 @@ require 'pandoc-ruby'
 require 'fileutils'
 require 'sanitize'
 require 'pp'
+require 'sqlite3'
+require 'active_record'
+require 'awesome_print'
+require 'pry'
 require_relative 'lib/asciiarabic'
 require_relative 'lib/flat_hash'
 require_relative 'lib/numeric_to_hindi'
+
+ActiveRecord::Base.establish_connection(
+  adapter: 'sqlite3',
+  database: '../../corpora/altafsir_com/processed/corpus.sqlite3'
+)
+
+class CTSUnit < ActiveRecord::Base
+  # CREATE TABLE units(
+  #   id          INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
+  #   cts_urn     CHAR(255) NOT NULL, 
+  #   text        TEXT, 
+  #   label       TEXT, 
+  #   title       CHAR(255), 
+  #   author_name CHAR(255), 
+  #   author_era  INTEGER
+  #   category_id INTEGER NOT NULL, 
+  #   author_id   INTEGER NOT NULL, 
+  #   sura_id     INTEGER NOT NULL,
+  #   aaya_id     NOT NULL, 
+  # );
+  default_scope {order('id ASC')}
+end
 
 class AlTafsirYAMLFiles
   def initialize
@@ -54,6 +80,26 @@ class AlTafsirYAMLFiles
     walk_tree__by_book(formats)
   end
 
+  def remove_specialchars(text)
+    text = text.gsub(/[^ \p{Arabic}]/, '') # This is a *very* crude method which does not even match vowelisation!
+    return text.squeeze
+  end
+
+  def urn(line_no)
+    # CITE CTS URN example:
+    # urn:cts:arabLit:tafsir.author.work:1.2.1234
+    author = ASCIIArabic.translit(@hash['meta_author'])
+    book   = ASCIIArabic.translit(@hash['meta_title'])
+    sura   = @hash['position_sura'].to_i
+    aaya   = @hash['position_aaya'].to_i
+    # No need to continue if we don't have the full URN
+    if (author.empty? || book.empty?)
+      return false
+    else
+      return "urn:cts:arabLit:tafsir.#{author}.#{book}:#{sura}.#{aaya}.#{line_no}"
+    end
+  end
+
   def cts_csv_writeline(madhab, tafseer, line_no, opts = {nospecialchars: false})
     # @hash contents example:
     #
@@ -67,25 +113,12 @@ class AlTafsirYAMLFiles
     #  "aaya"=>"بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
     #  "text"=>
     #    "<section><p>القول فـي تأويـل { بِسْمِ }.
-    #
-    # CITE CTS URN example:
-    #
-    # urn:cts:arabLit:tafsir.author.work:1.2.1234
-    author = ASCIIArabic.translit(@hash['meta_author'])
-    book   = ASCIIArabic.translit(@hash['meta_title'])
-    sura   = @hash['position_sura'].to_i
-    aaya   = @hash['position_aaya'].to_i
-    # No need to continue if we don't have the full URN
-    return if (author.empty? || book.empty?)
-    urn = "urn:cts:arabLit:tafsir.#{author}.#{book}:#{sura}.#{aaya}.#{line_no}"
+    return unless urn = encode_urn(line_no)
     outname = "%03d-%03d.csv" % [madhab, tafseer]
     optname = (opts.map {|k,v| k if v}).compact.join(',')
     outpath = File.join(@outpath, 'csv', ['cts+aaya', optname].reject {|i| i.empty?}.join('_'))
     text = @hash['text']
-    if opts[:nospecialchars]
-      text = text.gsub(/[^ \p{Arabic}]/, '') # This is a *very* crude method which does not even match vowelisation!
-      text = text.squeeze
-    end
+    text = remove_specialchars(text) if opts[:nospecialchars]
     values = [urn, text, @hash['aaya']]
     outfile = File.join(outpath, outname)
     FileUtils.mkdir_p(outpath)
@@ -100,7 +133,20 @@ class AlTafsirYAMLFiles
     end
   end
 
-  def cts_sqlite_writeline(madhab, tafseer, line)
+  def cts_sqlite_writeline(madhab, tafseer, line_no)
+    return unless urn = urn(line_no)
+    CTSUnit.create(
+      cts_urn: urn,
+      text: remove_specialchars(@hash['text']),
+      label:       @hash['aaya'],
+      title:       @hash['meta_title'],
+      author_name: @hash['meta_author'],
+      author_era:  @hash['meta_year'],
+      category_id: madhab,
+      author_id:   tafseer,
+      sura_id:     @hash['position_sura'].to_i,
+      aaya_id:     @hash['position_aaya'].to_i
+    )
   end
 
   def html5_addline
@@ -157,16 +203,17 @@ class AlTafsirYAMLFiles
   end
 
   def walk_tree__by_book(formats)
-    otherformats = formats.any? {|x| (x != 'csv' && x != 'csv_nospecialchars')}
+    otherformats = formats.any? {|x| (x != 'csv' && x != 'csv_nospecialchars' && x != 'sqlite')}
     plain = formats.include?('plain')
     csv = formats.include?('csv')
     sqlite = formats.include?('sqlite')
     csv_nospecialchars = formats.include?('csv_nospecialchars')
     puts "Writing books:"
     (1..@number_of_madahib).each do |m|
+      puts "  madhab #{m}"
       (1..@number_of_tafaseer_per_madhab[m-1]).each do |t|
         t0 = Time.now
-        print "  madhab #{m}, tafseer #{t} "
+        print "    tafseer #{t} "
         print 'csv ' if csv || csv_nospecialchars
         print 'sqlite ' if sqlite
         pattern = File.join(@inpath, 'sura_???', 'aaya_???', "madhab_#{"%02d" % m}", "tafsir_#{"%02d" % t}.yml")
@@ -187,7 +234,6 @@ class AlTafsirYAMLFiles
           # http://cite-architecture.github.io/ctsurn_spec/specification.html.
           cts_csv_writeline(m, t, i) if csv
           cts_sqlite_writeline(m, t, i) if sqlite
-          exit
           cts_csv_writeline(m, t, i, {nospecialchars: true}) if csv_nospecialchars
           html5_addline if otherformats
         end # sura, aaya
