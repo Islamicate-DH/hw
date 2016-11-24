@@ -1,0 +1,4 @@
+#!/usr/bin/env Rscript
+
+library(rmarkdown)
+rmarkdown::render('Paper.Rmd', pdf_document(latex_engine='lualatex'))
