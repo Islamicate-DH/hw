@@ -19,7 +19,7 @@ output:
 
 Yo, extraction was simple like tha' أخي:
 
-```{R}
+```{r}
 print(paste('Hello', 'world', '!'))
 ```
 
