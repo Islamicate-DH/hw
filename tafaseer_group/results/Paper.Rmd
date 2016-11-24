@@ -31,19 +31,8 @@ output:
 
 Yo, extraction was simple like tha':
 
-```{ruby}
-#!/usr/bin/env ruby
-
-files = [1, 2, 3]
-
-files.each do |f|
-  # This is actual code and is actually run
-  # when compiling the document, so I can't
-  # write things that'll break it.
-  puts "#{f}: f.download_it_from_the_internets"
-  puts "#{f}: f.do_cool_stuff_to_it"
-  puts "#{f}: f.save_as_csv"
-end
+```{R}
+print(paste('Hello', 'world', '!'))
 ```
 
 ## 1.3 Authors of the 18 works
