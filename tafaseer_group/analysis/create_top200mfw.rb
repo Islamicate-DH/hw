@@ -3,8 +3,8 @@
 require 'csv'
 
 mfw_list_dir = '/home/jrs/ba/analysis/output' # TODO: bring into hw!!!
-stopwords = CSV.read(File.join('data_IO', 'stopwords.csv')).flatten
-output = File.join('data_IO', "top#{n_max}mfw.csv")
+stopwords = CSV.read(File.join('data', 'stopwords.csv')).flatten
+output = File.join('data', "top#{n_max}mfw.csv")
 n_max=200
 
 CSV.open(output, 'w') do |csv|

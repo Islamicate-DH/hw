@@ -39,7 +39,7 @@ write_topics <- function(src, lda, k)
   topics = as.matrix(topics(lda))
   write.csv(
     topics, 
-    file=sprintf('data_IO/%s_LDAGibbs-%i-Docs2Topics.csv',src,k)
+    file=sprintf('data/%s_LDAGibbs-%i-Docs2Topics.csv',src,k)
   )
 }
 
@@ -49,7 +49,7 @@ write_topTerms <- function(src, lda, n, k)
   terms = as.matrix(terms(lda, n))
   write.csv(
     terms,
-    file=sprintf('data_IO/%s_LDAGibbs-%i-Topics2Terms.csv',src,k)
+    file=sprintf('data/%s_LDAGibbs-%i-Topics2Terms.csv',src,k)
   )
 }
 
@@ -59,7 +59,7 @@ write_probabilities <- function(src, lda, k)
   probabs = as.data.frame(lda@gamma)
   write.csv(
     probabs,
-    file=sprintf('data_IO/%s_LDAGibbs-%i-TopicProbabilities.csv',src,k)
+    file=sprintf('data/%s_LDAGibbs-%i-TopicProbabilities.csv',src,k)
   )
 }
 
@@ -74,11 +74,11 @@ write_relativeImportances <- function(src, dtm, probabs, k)
   })
   write.csv(
     one2two,
-    file=sprintf('data_IO/%s_LDAGibbs-%i-TopicOneImportance2Two.csv',src,k)
+    file=sprintf('data/%s_LDAGibbs-%i-TopicOneImportance2Two.csv',src,k)
   )
   write.csv(
     two2three,
-    file=sprintf('data_IO/%s_LDAGibbs-%i-TopicTwoImportance2Three.csv',src,k)
+    file=sprintf('data/%s_LDAGibbs-%i-TopicTwoImportance2Three.csv',src,k)
   )  
 }
 
