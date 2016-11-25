@@ -1,5 +1,7 @@
 #!/usr/bin/env Rscript
 
 library(data.table)
-csv = fread('stopwords.csv')
-saveRDS(csv, 'stopwords.rds')
+
+args = commandArgs(trailingOnly = TRUE)
+csv = fread(args[1])
+saveRDS(csv, args[2])

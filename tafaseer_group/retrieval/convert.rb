@@ -1,14 +1,42 @@
 #!/usr/bin/env ruby
 
+require 'bundler/setup'
 require 'yaml'
 require 'csv'
 require 'pandoc-ruby'
 require 'fileutils'
 require 'sanitize'
 require 'pp'
+require 'sqlite3'
+require 'active_record'
+require 'awesome_print'
+require 'pry'
+require 'nokogiri'
 require_relative 'lib/asciiarabic'
 require_relative 'lib/flat_hash'
 require_relative 'lib/numeric_to_hindi'
+
+ActiveRecord::Base.establish_connection(
+  adapter: 'sqlite3',
+  database: '../../corpora/altafsir_com/processed/corpus.sqlite3'
+)
+
+class CTSUnit < ActiveRecord::Base
+  # CREATE TABLE units(
+  #   id          INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
+  #   cts_urn     CHAR(255) NOT NULL, 
+  #   text        TEXT, 
+  #   label       TEXT, 
+  #   title       CHAR(255), 
+  #   author_name CHAR(255), 
+  #   author_era  INTEGER
+  #   category_id INTEGER NOT NULL, 
+  #   author_id   INTEGER NOT NULL, 
+  #   sura_id     INTEGER NOT NULL,
+  #   aaya_id     NOT NULL, 
+  # );
+  default_scope {order('id ASC')}
+end
 
 class AlTafsirYAMLFiles
   def initialize
@@ -54,7 +82,32 @@ class AlTafsirYAMLFiles
     walk_tree__by_book(formats)
   end
 
-  def cts_csv_writeline(madhab, tafseer, line_no, opts = {arabic_only: false})
+  def remove_specialchars(text)
+    text = text.gsub(/[^ \p{Arabic}]/, '') # This is a *very* crude method which does not even match vowelisation!
+    return text.squeeze
+  end
+
+  def urn(line_no)
+    # CITE CTS URN example:
+    # urn:cts:arabLit:tafsir.author.work:1.2.1234
+    author = ASCIIArabic.translit(@hash['meta_author'])
+    book   = ASCIIArabic.translit(@hash['meta_title'])
+    sura   = @hash['position_sura'].to_i
+    aaya   = @hash['position_aaya'].to_i
+    # No need to continue if we don't have the full URN
+    if (author.empty? || book.empty?)
+      return false
+    else
+      return "urn:cts:arabLit:tafsir.#{author}.#{book}:#{sura}.#{aaya}.#{line_no}"
+    end
+  end
+
+  # For purposes of the DH Leipzig/Maryland/etc. research groups (be
+  # able to use To Pan, etc.) the CSV files must comply with CITE CTS.
+  # The specs are at
+  # http://cite-architecture.github.io/ctsurn_spec/specification.html.
+  
+  def cts_csv_writeline(madhab, tafseer, line_no, opts = {nospecialchars: false})
     # @hash contents example:
     #
     # {"position_sura"=>1,
@@ -67,32 +120,17 @@ class AlTafsirYAMLFiles
     #  "aaya"=>"بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
     #  "text"=>
     #    "<section><p>القول فـي تأويـل { بِسْمِ }.
-    #
-    # CITE CTS URN example:
-    #
-    # urn:cts:arabLit:tafsir.author.work:1.2.1234
-    author = ASCIIArabic.translit(@hash['meta_author'])
-    book   = ASCIIArabic.translit(@hash['meta_title'])
-    sura   = @hash['position_sura'].to_i
-    aaya   = @hash['position_aaya'].to_i
-    # No need to continue if we don't have the full URN
-    return if (author.empty? || book.empty?)
-    urn = "urn:cts:arabLit:tafsir.#{author}.#{book}:#{sura}.#{aaya}.#{line_no}"
+    return unless urn = encode_urn(line_no)
     outname = "%03d-%03d.csv" % [madhab, tafseer]
-    if opts[:arabic_only]
-      outpath = File.join(@outpath, 'csv', 'cts+aaya_nospecialchars')
-    else
-      outpath = File.join(@outpath, 'csv', 'cts+aaya')
-    end
+    optname = (opts.map {|k,v| k if v}).compact.join(',')
+    outpath = File.join(@outpath, 'csv', ['cts+aaya', optname].reject {|i| i.empty?}.join('_'))
+    text = @hash['text']
+    text = remove_specialchars(text) if opts[:nospecialchars]
+    values = [urn, text, @hash['aaya']]
     outfile = File.join(outpath, outname)
     FileUtils.mkdir_p(outpath)
     write_header = !(File.file?(outfile))
     header = ['urn', 'text', 'aaya']
-    if opts[:arabic_only]
-      values = [urn, @hash['text'].match(/[\h\p{Arabic}]/).gsub(/\s\s+/, ' '), @hash['aaya']]
-    else
-      values = [urn, @hash['text'], @hash['aaya']]
-    end
     CSV.open(outfile, 'ab') do |csv|
       if write_header
         csv << header
@@ -102,37 +140,60 @@ class AlTafsirYAMLFiles
     end
   end
 
+  def cts_sqlite_writeline(madhab, tafseer, line_no)
+    return unless urn = urn(line_no)
+    CTSUnit.create(
+      cts_urn: urn,
+      text: remove_specialchars(@hash['text']),
+      label:       @hash['aaya'],
+      title:       @hash['meta_title'],
+      author_name: @hash['meta_author'],
+      author_era:  @hash['meta_year'],
+      category_id: madhab,
+      author_id:   tafseer,
+      sura_id:     @hash['position_sura'].to_i,
+      aaya_id:     @hash['position_aaya'].to_i
+    )
+  end
+
   def html5_addline
     @html += "<h1>#{@hash['meta_title']} ل#{@hash['meta_author']} (ت. #{@hash['meta_year'].to_i.to_hindi})</h1>" if @html.empty?
     @html += "<h2 class='quran'>#{@hash['aaya']}</h2>\n#{@hash['text']}\n"
   end
 
   def html5_write_unless_exists(madhab, tafseer)
-    print 'html5 '
     outname = "%03d-%03d.html" % [madhab, tafseer]
     outpath = File.join(@outpath, 'html5')
     outfile = File.join(outpath, outname)
     unless File.file?(outfile)
+      print 'html5 '
       FileUtils.mkdir_p(outpath)
       File.write(outfile, @header+@html+@footer)
     end
     outfile
   end
 
-  def plain_text_write(html_file, madhab, tafseer)
+  def plain_text_write(html_file, madhab, tafseer, opts = {nohadith: false})
     outname = "%03d-%03d.txt" % [madhab, tafseer]
-    outpath = File.join(@outpath, 'plain')
+    lastdir = "complete"
+    html = Nokogiri::HTML(File.read(html_file))
+    if opts[:nohadith]
+      lastdir = "nohadith"
+      html.at_css('p.hadith').remove
+    end
+    html = html.at_css('body').text.strip
+    outpath = File.join(@outpath, 'plain', lastdir)
     plain_file = File.join(outpath, outname)
     FileUtils.mkdir_p(outpath)
     File.open(plain_file, 'w') do |outfile|
       print 'plain '
-        outfile.puts Sanitize.fragment(@html, {
-          whitespace_elements: {
-            'h1':      { before: "\n",   after: "\n\n" },
-            'h2':      { before: "\n",   after: "\n"   },
-            'section': { before: "\n\n", after: "\n"   },
-            'p':       { before: "\n",   after: "\n"   }
-        }})
+      outfile.puts Sanitize.fragment(html, {
+        whitespace_elements: {
+          'h1':      { before: "\n",   after: "\n\n" },
+          'h2':      { before: "\n",   after: "\n"   },
+          'section': { before: "\n\n", after: "\n"   },
+          'p':       { before: "\n",   after: "\n"   }
+      }})
     end
   end
 
@@ -150,22 +211,28 @@ class AlTafsirYAMLFiles
       outfile = File.join(outpath, "#{outname}.#{ext}")
       FileUtils.mkdir_p(outpath)
       File.open(outfile, 'w') do |file|
-        file.puts PandocRuby.html([infile]).convert({to: format}, 'no-wrap')
+        file.puts PandocRuby.html([infile]).convert({to: format}, wrap: 'none')
       end
     end
   end
 
+  def set_format_flags(formats)
+    @formats = {other: formats.any? {|x| (x != 'csv' && x != 'csv_nospecialchars' && x != 'sqlite' && x != 'plain_nohadith')}}
+    formats.each do |f|
+      @formats[f.to_sym] = formats.include?(f)
+    end
+  end
+
   def walk_tree__by_book(formats)
-    otherformats = formats.any? {|x| x != 'csv'}
-    plain = formats.include?('plain')
-    csv = formats.include?('csv')
-    csv_nospecialchars = formats.include?('csv_nospecialchars')
+    set_format_flags(formats)
     puts "Writing books:"
     (1..@number_of_madahib).each do |m|
+      puts "  madhab #{m}"
       (1..@number_of_tafaseer_per_madhab[m-1]).each do |t|
         t0 = Time.now
-        print "  madhab #{m}, tafseer #{t} "
-        print 'csv ' if csv 
+        print "    tafseer #{t} "
+        print 'csv ' if @formats[:csv] || @formats[:csv_nospecialchars]
+        print 'sqlite ' if @formats[:sqlite]
         pattern = File.join(@inpath, 'sura_???', 'aaya_???', "madhab_#{"%02d" % m}", "tafsir_#{"%02d" % t}.yml")
         files = Dir.glob(pattern).sort
         @html = '' # Wipe last BOOK's data
@@ -178,22 +245,24 @@ class AlTafsirYAMLFiles
             col = k.join('_')
             @hash[col] = v
           end
-          # Note that for purposes of the DH Leipzig/Maryland/etc. research 
-          # groups (be able to use To Pan, etc.) the CSV files must comply
-          # with CITE CTS. The specs are at
-          # http://cite-architecture.github.io/ctsurn_spec/specification.html.
-          cts_csv_writeline(m, t, i) if csv
-          cts_csv_writeline(m, t, i, {arabic_only: true}) if csv_nospecialchars
-          html5_addline if otherformats
+          cts_csv_writeline(m, t, i) if @formats[:csv]
+          cts_csv_writeline(m, t, i, nospecialchars: true) if @formats[:csv_nospecialchars]
+          cts_sqlite_writeline(m, t, i) if @formats[:sqlite]
+          html5_addline if @formats[:plain] || @formats[:plain_nohadith] || formats[:other]
         end # sura, aaya
         html_file = html5_write_unless_exists(m, t)
-        plain_text_write(html_file, m, t) if plain 
-        other_formats_write(html_file, m, t, formats) if otherformats
+        plain_text_write(html_file, m, t) if @formats[:plain]
+        plain_text_write(html_file, m, t, nohadith: true) if @formats[:plain_nohadith]
+        other_formats_write(html_file, m, t, formats) if @formats[:other]
         puts "(%s files, %ss)" % [i, (Time.now-t0).round(1)]
+        exit
       end # tafaseer
     end # madahib
   end
 end
 
-# Add/Remove formats as desired (see pandoc help for available ones)
-AlTafsirYAMLFiles.convert_to(%w{csv_nospecialchars}) # html5 csv plain latex docx})
+if (ARGV.include?('-h') || ARGV.empty?)
+  puts "Usage: ./convert.rb [sqlite|csv|csv_nospecialchars|html5|plain|plain_nohadith|latex|docx]"
+else
+  AlTafsirYAMLFiles.convert_to(ARGV)
+end
