@@ -2,11 +2,12 @@
 
 require 'csv'
 
-mfw_list_dir = '/home/jrs/ba/analysis/output'
-stopwords = CSV.read('stopwords.csv').flatten
+mfw_list_dir = '/home/jrs/ba/analysis/output' # TODO: bring into hw!!!
+stopwords = CSV.read(File.join('data_IO', 'stopwords.csv')).flatten
+output = File.join('data_IO', "top#{n_max}mfw.csv")
 n_max=200
 
-CSV.open("top#{n_max}mfw.csv", 'w') do |csv|
+CSV.open(output, 'w') do |csv|
   files = Dir.glob(mfw_list_dir + '/wordcount-???-???.csv')
   header = ['pos']
   files.each do |f|
