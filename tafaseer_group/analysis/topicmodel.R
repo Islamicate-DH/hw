@@ -7,8 +7,8 @@ params = list(
   seed    = list(2003, 5, 63, 100001, 765),
   nstart  =    5,
   best    = TRUE,
-  # k     =   18, # Number of works
-  k       =    2, # For testing purposes only
+  k       =   18, # Number of works
+  # k     =    2, # For testing purposes only
   verbose = 2000  # Show progress every x iterations
 )
 
