@@ -1,1 +1,10 @@
+.RData
 .Rhistory
+tmp
+corpora/*
+*.html
+*.pdf
+*.rds
+*.xls
+*.xlsx
+*.ods
