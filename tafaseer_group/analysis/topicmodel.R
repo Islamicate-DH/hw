@@ -1,5 +1,6 @@
 #!/usr/bin/env Rscript
 
+# TODO: Think about first implementing https://cran.r-project.org/web/packages/ldatuning/vignettes/topics.html
 params = list(
   burnin  = 4000,
   iter    = 2000,
@@ -28,7 +29,13 @@ crunch_lda <- function(dtm, params)
   LDA(
     dtm,
     params$k,
-    method='Gibbs', # Who is he and why do we like him?
+    # Who is he and why do we like him?
+    # Answer Leeroy Jethro is of course our hero. In this case,
+    # because he allows running some LDA steps on multiple processors
+    # and also because he has lower memory requirements than previous
+    # methods. MEMORY USAGE STILL RISES WITH CORPUS SIZE, THOUGH!!!
+    # (Cf. https://cran.r-project.org/web/packages/topicmodels/vignettes/topicmodels.pdf)
+    method='Gibbs', 
     control=params
   )
 }
