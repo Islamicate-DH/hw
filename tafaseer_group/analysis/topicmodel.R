@@ -1,56 +1,113 @@
-library(tm)
-library(topicmodels)
+#!/usr/bin/env Rscript
 
-filenames <- dir('../../corpora/altafsir_com/processed/plain/')
-files <- lapply(filenames, readLines)
-docs <- Corpus(VectorSource(files))
+params = list(
+  burnin  = 4000,
+  iter    = 2000,
+  thin    =  500,
+  seed    = list(2003, 5, 63, 100001, 765),
+  nstart  =    5,
+  best    = TRUE,
+  # k     =   18, # Number of works
+  k       =    2, # For testing purposes only
+  verbose = 2000  # Show progress every x iterations
+)
 
-#Create document-term matrix-Takes awhile
-dtm <- DocumentTermMatrix(docs)
-#convert rownames to filenames
-rownames(dtm) <- filenames
-#collapse matrix by summing over columns
-freq <- colSums(as.matrix(dtm))
-#length should be total number of terms
-length(freq)
-#create sort order (descending)
-ord <- order(freq,decreasing=TRUE)
-#List all terms in decreasing order of freq and write to disk
-freq[ord]
-write.csv(freq[ord], "word_freq.csv")
+build_dtm <- function(file)
+{
+  message('Reading in files...')
+  file = lapply(file, readLines)
+  message('Building corpus...')
+  corpus = Corpus(VectorSource(file))
+  message('Building DT matrix...')
+  DocumentTermMatrix(corpus)
+}
 
-#parameters
-burnin <- 4000
-iter <- 2000
-thin <- 500
-seed <-list(2003,5,63,100001,765)
-nstart <- 5
-best <- TRUE
-k <- 18 # number of works
+crunch_lda <- function(dtm, params)
+{
+  message('Crunching LDA function...')
+  LDA(
+    dtm,
+    params$k,
+    method='Gibbs', # Who is he and why do we like him?
+    control=params
+  )
+}
 
-ldaOut <-LDA(dtm,k, method= "Gibbs" , control=list(nstart=nstart, seed = seed, best=best, burnin = burnin, iter = iter, thin=thin))
+write_topics <- function(src, lda, k)
+{
+  message('Building topics from LDA results...')
+  topics = as.matrix(topics(lda))
+  write.csv(
+    topics, 
+    file=sprintf('data_IO/%s_LDAGibbs-%i-Docs2Topics.csv',src,k)
+  )
+}
 
-#write out results
-#docs to topics
-ldaOut.topics <- as.matrix(topics(ldaOut))
-write.csv(ldaOut.topics,file=paste("LDAGibbs", k, "DocsToTopics.csv"))
+write_topTerms <- function(src, lda, n, k)
+{
+  message(sprintf('Calculating top %i topics from LDA results...',k))
+  terms = as.matrix(terms(lda, n))
+  write.csv(
+    terms,
+    file=sprintf('data_IO/%s_LDAGibbs-%i-Topics2Terms.csv',src,k)
+  )
+}
 
-#top 6 terms in each topic
-ldaOut.terms <- as.matrix(terms(ldaOut,6))
-write.csv(ldaOut.terms,file=paste("LDAGibbs",k,"TopicsToTerms.csv"))
+write_probabilities <- function(src, lda, k)
+{
+  message('Calculating topic probabilities from LDA results...')
+  probabs = as.data.frame(lda@gamma)
+  write.csv(
+    probabs,
+    file=sprintf('data_IO/%s_LDAGibbs-%i-TopicProbabilities.csv',src,k)
+  )
+}
 
-#probabilities associated with each topic assignment
-topicProbabilities <- as.data.frame(ldaOut@gamma)
-write.csv(topicProbabilities,file=paste("LDAGibbs",k,"TopicProbabilities.csv"))
+write_relativeImportances <- function(src, dtm, probabs, k)
+{
+  message('Finding relative importances between topics 1/2, 2/3...')
+  one2two = lapply(1:nrow(dtm), function(x) {
+    sort(probabs[x,])[k-0] / sort(probabs[x,])[k-1]
+  })
+  two2three = lapply(1:nrow(dtm), function(x) {
+    sort(probabs[x,])[k-1] / sort(probabs[x,])[k-2]
+  })
+  write.csv(
+    one2two,
+    file=sprintf('data_IO/%s_LDAGibbs-%i-TopicOneImportance2Two.csv',src,k)
+  )
+  write.csv(
+    two2three,
+    file=sprintf('data_IO/%s_LDAGibbs-%i-TopicTwoImportance2Three.csv',src,k)
+  )  
+}
 
-#Find relative importance of top 2 topics
-topic1ToTopic2 <- lapply(1:nrow(dtm),function(x)
-  sort(topicProbabilities[x,])[k]/sort(topicProbabilities[x,])[k-1])
+run_tm <- function(file)
+{ 
+  t0 = proc.time()
+  message(sprintf('Execution for %s starts at %.3fms', file, t0[1]))
+  dtm = build_dtm(file)
+  lda_results = crunch_lda(dtm, params)
+  # What's with all the parentheses, R?!
+  basename = strsplit(basename(file), '\\.')[[1]][1]
+  write_topics(basename, lda_results, params$k)
+  write_topTerms(basename, lda_results, 6, params$k)
+  probabs = write_probabilities(basename, lda_results, params$k)
+  write_relativeImportances(basename, dtm, probabs, params$k)
+  message(
+    sprintf('Success after %.2f mins',
+    (proc.time() - t0)[3] / 60)
+  )
+}
 
-#Find relative importance of second and third most important topics
-topic2ToTopic3 <- lapply(1:nrow(dtm),function(x)
-  sort(topicProbabilities[x,])[k-1]/sort(topicProbabilities[x,])[k-2])
+for (lib in c('tm', 'topicmodels')) {
+  suppressPackageStartupMessages(library(lib, character.only = TRUE))
+}
 
-#write to file
-write.csv(topic1ToTopic2,file=paste("LDAGibbs",k,"Topic1ToTopic2.csv"))
-write.csv(topic2ToTopic3,file=paste("LDAGibbs",k,"Topic2ToTopic3.csv"))
+args = commandArgs(trailingOnly=TRUE)
+
+if (length(args)==0) {
+  message('Usage: ./topicmodel.R [list of files to process]')
+} else {
+  lapply(args, run_tm)
+}
