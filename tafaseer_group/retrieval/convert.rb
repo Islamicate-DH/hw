@@ -175,25 +175,29 @@ class AlTafsirYAMLFiles
 
   def plain_text_write(html_file, madhab, tafseer, opts = {nohadith: false})
     outname = "%03d-%03d.txt" % [madhab, tafseer]
-    lastdir = "complete"
-    html = Nokogiri::HTML(File.read(html_file))
-    if opts[:nohadith]
-      lastdir = "nohadith"
-      html.at_css('p.hadith').remove
-    end
-    html = html.at_css('body').text.strip
+    lastdir = opts[:nohadith] ? 'nohadith' : 'complete'
     outpath = File.join(@outpath, 'plain', lastdir)
     plain_file = File.join(outpath, outname)
-    FileUtils.mkdir_p(outpath)
-    File.open(plain_file, 'w') do |outfile|
-      print 'plain '
-      outfile.puts Sanitize.fragment(html, {
-        whitespace_elements: {
-          'h1':      { before: "\n",   after: "\n\n" },
-          'h2':      { before: "\n",   after: "\n"   },
-          'section': { before: "\n\n", after: "\n"   },
-          'p':       { before: "\n",   after: "\n"   }
-      }})
+    unless File.exist?(plain_file)
+      html = Nokogiri::HTML(File.read(html_file))
+      if opts[:nohadith]
+        print 'plain_nohadith '
+        hadith_paragraphs = html.at_css('p.hadith')
+        hadith_paragraphs.remove if hadith_paragraphs
+      else
+        print 'plain '
+      end
+      html = html.at_css('body').text.strip
+      FileUtils.mkdir_p(outpath)
+      File.open(plain_file, 'w') do |outfile|
+        outfile.puts Sanitize.fragment(html, {
+          whitespace_elements: {
+            'h1':      { before: "\n",   after: "\n\n" },
+            'h2':      { before: "\n",   after: "\n"   },
+            'section': { before: "\n\n", after: "\n"   },
+            'p':       { before: "\n",   after: "\n"   }
+        }})
+      end
     end
   end
 
@@ -255,7 +259,6 @@ class AlTafsirYAMLFiles
         plain_text_write(html_file, m, t, nohadith: true) if @formats[:plain_nohadith]
         other_formats_write(html_file, m, t, formats) if @formats[:other]
         puts "(%s files, %ss)" % [i, (Time.now-t0).round(1)]
-        exit
       end # tafaseer
     end # madahib
   end
