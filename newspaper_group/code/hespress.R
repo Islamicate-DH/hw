@@ -18,7 +18,7 @@ source("scrapeR.R")
 source("cleanR.R")
 
 
-
+source("/home/tobias/Dokumente/islamicate2.0/hw/newspaper_group/code/cleanR.R")
 ###############################################################################
 ##                          CALLING THE SCRIPTS
 ###############################################################################
@@ -47,5 +47,5 @@ option_list = list(
 ); o = parse_args(OptionParser(option_list=option_list))
 
 #scrape.day(o$day)
-#source.folder<- "hespress2011"
-#clean.hespress(source.folder)
+source.folder<- "/home/tobias/Schreibtisch/hespress2010"
+clean.hespress(source.folder)

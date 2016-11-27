@@ -44,7 +44,7 @@ enableJIT(3)
 
 
 
- base_corpus <- read.table("/home/tobias/Dropbox/Dokumente/islamicate2.0/reduced_stem/ahram_stem.csv", sep=",", header=FALSE,encoding = "UTF-8",stringsAsFactors = F)
+ base_corpus <- read.table("/home/tobias/Dropbox/Dokumente/islamicate2.0/reduced/hespress.csv", sep=",", header=FALSE,encoding = "UTF-8",stringsAsFactors = F)
 
 research_corpus <- as.character(base_corpus$V2)
  output_names <- as.character(base_corpus$V1)
@@ -140,7 +140,7 @@ json <- createJSON(phi = research_corpusAbstracts$phi,
                    R=terms_shown)
 
 #Visulise and start browser
-serVis(json, out.dir = '/home/tobias/Dropbox/Dokumente/islamicate2.0/reduced_stem', open.browser = FALSE)
+serVis(json, out.dir = '/home/tobias/Dropbox/Dokumente/islamicate2.0/vis/hespress', open.browser = FALSE)
 
 ## get the tables
 
@@ -161,7 +161,7 @@ for (i in 1:K){
   phicolnames[i+1] <- paste(head(phi.t.df[order(phi.t.df[,i+1],decreasing=TRUE),], n=7)[,1], sep="", collapse="_")
 }
 colnames(phi.t.df) <- phicolnames
-write.table(phi.t.df, file = '/home/tobias/Dropbox/Dokumente/islamicate2.0/reduced_stem/phi.csv', append = FALSE, quote = FALSE, sep = ",", eol = "\n", na = "NA", dec = ".", row.names = FALSE, col.names = TRUE)
+write.table(phi.t.df, file = '/home/tobias/Dropbox/Dokumente/islamicate2.0/vis/hespress/phi.csv', append = FALSE, quote = FALSE, sep = ",", eol = "\n", na = "NA", dec = ".", row.names = FALSE, col.names = TRUE)
 
 ## get document-topic distributions and export as csv
 theta.frame <- data.frame(matrix(nrow=length(theta[,1]), ncol = K+1))
@@ -172,7 +172,7 @@ for (i in 1:K){
 thetacolnames <- phicolnames
 thetacolnames[1] <- "identifier"
 colnames(theta.frame) <- thetacolnames
-write.table(theta.frame, file = '/home/tobias/Dropbox/Dokumente/islamicate2.0/reduced_stem/theta.csv', append = FALSE, quote = FALSE, sep = ",", eol = "\n", na = "NA", dec = ".", row.names = FALSE, col.names = TRUE)
+write.table(theta.frame, file = '/home/tobias/Dropbox/Dokumente/islamicate2.0/vis/hespress/theta.csv', append = FALSE, quote = FALSE, sep = ",", eol = "\n", na = "NA", dec = ".", row.names = FALSE, col.names = TRUE)
 
 
 

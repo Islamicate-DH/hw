@@ -4,132 +4,124 @@ rm(list=ls())
 
 # might be nec. to change this.
 
+source("/home/tobias/Dokumente/islamicate2.0/hw/newspaper_group/code/basic_functions.R")
 
 # 
-# ####
-# corpus2011<-read.csv(file="/home/tobias/Dokumente/islamicate2.0/hw/newspaper_group/data/Hespress/hespress2011.csv",fileEncoding = "UTF-8",sep=",",header = FALSE,stringsAsFactors=F )
-# corpus2010<-read.csv(file="/home/tobias/Dokumente/islamicate2.0/hw/newspaper_group/data/Hespress/hespress2010.csv",fileEncoding = "UTF-8",sep=",",header = FALSE,stringsAsFactors=F)
+# # ####
+#  corpus2011<-read.csv(file="/home/tobias/Schreibtisch/Newspaper Corpus/Hespress/hespress2010.csv",fileEncoding = "UTF-8",sep=",",header = FALSE,stringsAsFactors=F )
+#  corpus2010<-read.csv(file="/home/tobias/Schreibtisch/Newspaper Corpus/Hespress/hespress2011.csv",fileEncoding = "UTF-8",sep=",",header = FALSE,stringsAsFactors=F)
+#  corpus2010<-corpus2010[corpus2010$V4!="",]
+#  corpus2011<-corpus2011[corpus2011$V4!="",]
+#  # 
+# # 
+#  corpus2011<-f.replaceMonthNames(corpus2011,month.col = 2)
+#  corpus2010<-f.replaceMonthNames(corpus2010,month.col = 2)
+# # 
+# # 
+# # 
 # 
+#  dec<-corpus2010[which(corpus2010$V2==12),]
 # 
-# corpus2011<-f.replaceMonthNames(corpus2011,month.col = 2)
-# corpus2010<-f.replaceMonthNames(corpus2010,month.col = 2)
-# 
-# 
-# 
-f.replaceMonthNames<- function(corpus,month.col=2){
-  Sys.setlocale("LC_TIME", "ar_AE.utf8");
-  month.dates<-seq(as.Date("2012-01-01"), as.Date("2012-12-31"), "months")
-  month.names<-format(month.dates, "%B")
-
-  for(i in 1:11){
-    corpus[which(corpus[,month.col]==month.names[i]),month.col]<-i
-  }
-
-  corpus[which(corpus[,month.col]== "دجنبر"),month.col]<-12
-  corpus[which(corpus[,month.col]== "ديسمبر"),month.col]<-12
-  corpus[which(corpus[,month.col]== "نونبر"),month.col]<-11
-  corpus[which(corpus[,month.col]== "اكتوبر"),month.col]<-10
-  
-  
-  corpus[which(corpus[,month.col]== "شتنبر"),month.col]<-9
-  corpus[which(corpus[,month.col]== "غشت"),month.col]<-8
-  corpus[which(corpus[,month.col]== "غشت"),month.col]<-8
-  corpus[which(corpus[,month.col]== "يوليوز"),month.col]<-5
-  corpus[which(corpus[,month.col]== "ابريل"),month.col]<-4
-  
-  
-  return(corpus)
-}
-
-# dec<-corpus2010[which(corpus2010$V2==12),]
-
-
-
-# dec<-dec[dec$V4!="",]
 # 
 # ids<-1:dim(dec)[1]
-# uri<-paste("HP",dec$V1,dec$V2,dec$V3,ids,sep = "")
+#  uri<-paste("HP",dec$V1,dec$V2,SPRINTF(dec$V3),"$",ids,sep = "")
 # 
-# new.corpus<-data.frame(uri,dec$V4 ,stringsAsFactors = F)
-# write.table(new.corpus,col.names = FALSE,row.names = FALSE,"/home/tobias/hespress.csv",sep = ",",fileEncoding = "UTF-8",append = T)
-# 
-# sp<-dim(dec)[1]
+#  new.corpus<-data.frame(uri,dec$V4 ,stringsAsFactors = F)
+#  write.table(new.corpus,col.names = FALSE,row.names = FALSE,"/home/tobias/Dropbox/Dokumente/islamicate2.0/reduced/hespress.csv",sep = ",",fileEncoding = "UTF-8",append = T)
+# # 
+#  sp<-dim(dec)[1]
 # for(i in 1:5){
 #   month<-corpus2011[which(corpus2011$V2==i),]
-#   
-#   
+# 
+# 
 #   ids<-(sp+1):(sp+dim(month)[1])
 #   sp<-sp+dim(month)[1]
-#   
-#   uri<-paste("HP",month$V1,month$V2,month$V3,ids,sep = "")
+# 
+#   uri<-paste("HP",month$V1,SPRINTF(as.integer(month$V2)),SPRINTF(month$V3),ids,sep = "")
 #   new.corpus<-data.frame(uri,month$V4 ,stringsAsFactors = F)
-#   write.table(new.corpus,col.names = FALSE,row.names = FALSE,"/home/tobias/hespress.csv",sep = ",",fileEncoding = "UTF-8",append = T)
+#   write.table(new.corpus,col.names = FALSE,row.names = FALSE,"/home/tobias/Dropbox/Dokumente/islamicate2.0/reduced/hespress.csv",sep = ",",fileEncoding = "UTF-8",append = T)
 # }
-# 
 
+  corpus<-read.csv(file="/home/tobias/Dropbox/Dokumente/islamicate2.0/reduced/hespress.csv",fileEncoding = "UTF-8",sep=",",header = FALSE,stringsAsFactors=F)
 
-
-
-
-
-# corpus2010_11<-read.csv(file="/home/tobias/Dokumente/islamicate2.0/hw/newspaper_group/data/Thawra/thawra2010_11.csv",fileEncoding = "UTF-8",sep=",",header = FALSE,stringsAsFactors=F)
+  
 # 
-# corpus2010<-  corpus2010_10[which(corpus2010_11$V1==2010),]
-# corpus2011<-corpus2010_11[which(corpus2010_11$V1==2011),]
+#   corpus$V2 <- gsub("[[:punct:]]", " ", corpus$V2)  # replace punctuation with space
+#   corpus$V2 <- gsub("[[:cntrl:]]", " ", corpus$V2)  # replace control characters with space
+#   corpus$V2 <- gsub("^[[:space:]]+", "", corpus$V2) # remove whitespace at beginning of documents
+#   corpus$V2 <- gsub("[[:space:]]+$", "", corpus$V2) # remove whitespace at end of documents
+#   corpus$V2 <- gsub("[0-9]", "", corpus$V2) #remove numbers
 # 
-# dec<-corpus2010[which(corpus2011$V2==12),]
-# dec<-dec[dec$V4!="",]
-# 
-# ids<-1:dim(dec)[1]
-# uri<-paste("TH",dec$V1,dec$V2,dec$V3,ids,sep = "")
-# 
-# new.corpus<-data.frame(uri,dec$V4 ,stringsAsFactors = F)
-# write.table(new.corpus,col.names = FALSE,row.names = FALSE,"/home/tobias/Dropbox/Dokumente/islamicate2.0/reduced/thawra.csv",sep = ",",fileEncoding = "UTF-8",append = T)
-# 
-#  sp<-dim(dec)[1]
-#  for(i in 1:5){
-#    
-#   month<-corpus2011[which(corpus2011$V2==i),]
-#   month<-month[month$V4!="",]
-#   ids<-(sp+1):(sp+dim(month)[1])
-#   uri<-paste("TH",month$V1,month$V2,month$V3,ids,sep = "")
+#   corpus$V2<-gsub("[[:ascii]]","", perl=T,corpus$V2 )
+#   write.table(corpus,col.names = FALSE,row.names = FALSE,"/home/tobias/Dropbox/Dokumente/islamicate2.0/reduced/hespress_c.csv",sep = ",",fileEncoding = "UTF-8",append = F)
 #   
-#   newCorpus<-data.frame(uri,month,stringsAsFactors = F)
 #   
-#   write.table(newCorpus,col.names = FALSE,row.names = FALSE,"/home/tobias/Dropbox/Dokumente/islamicate2.0/reduced/thawra.csv",sep = ",",fileEncoding = "UTF-8",append = T)
-# 
-#  }
-#  
+  
+  
+  
+  
+
+  corpus2010_11<-read.csv(file="/home/tobias/Schreibtisch/tharwa.csv",encoding = "UTF-8",sep=",",header = FALSE,stringsAsFactors=F, comment.char = "")
+
+    corpus2010<-  corpus2010_11[which(corpus2010_11$V1==2010),]
+   corpus2011<-corpus2010_11[which(corpus2010_11$V1==2011),]
+    corpus2010<-corpus2010[corpus2010$V4!="",]
+    corpus2011<-corpus2011[corpus2011$V4!="",]
+
+#
+ dec<-corpus2010[which(corpus2010$V2==12),]
+
+#
+ ids<-1:dim(dec)[1]
+ uri<-paste("TH",dec$V1,SPRINTF(as.integer(dec$V2)),SPRINTF(as.integer(dec$V3)),"$",ids,sep = "")
+#
+ new.corpus<-data.frame(uri,dec$V4 ,stringsAsFactors = F)
+ write.table(new.corpus,col.names = FALSE,row.names = FALSE,"/home/tobias/Dropbox/Dokumente/islamicate2.0/reduced/thawra.csv",sep = ",",fileEncoding = "UTF-8",append = F)
+
+
+ sp<-dim(dec)[1]
+ for(i in 1:4){
+
+  month<-corpus2011[which(corpus2011$V2==i),]
+
+  ids<-(sp+1):(sp+dim(month)[1])
+  uri<-paste("TH",month$V1,SPRINTF(as.integer(month$V2)),SPRINTF(as.integer(month$V3)),"$",ids,sep = "")
+
+  newCorpus<-data.frame(uri,month$V4,stringsAsFactors = F)
+
+  write.table(newCorpus,col.names = FALSE,row.names = FALSE,"/home/tobias/Dropbox/Dokumente/islamicate2.0/reduced/thawra.csv",sep = ",",fileEncoding = "UTF-8",append = T)
+
+ }
+
  
  
  
-# 
-# corpus2011<-read.csv(file="/home/tobias/Dokumente/islamicate2.0/hw/newspaper_group/data/Ahram/2011_01_01-2012_12_11.csv",fileEncoding = "UTF-8",sep=",",header = FALSE,stringsAsFactors=F)
-# corpus2010<-read.csv(file="/home/tobias/Dokumente/islamicate2.0/hw/newspaper_group/data/Ahram/ahram_dec2010.csv",fileEncoding = "UTF-8",sep=",",header = FALSE,stringsAsFactors=F)
-# 
-# 
-#   corpus2010<-f.replaceMonthNames(corpus2010,month.col = 2)
-#   corpus2011<-f.replaceMonthNames(corpus2011,month.col = 3)
-#   
-#    ids<-1:dim(corpus2010)[1]
+# # 
+  corpus2011<-read.csv(file="/home/tobias/Schreibtisch/Newspaper Corpus/Ahram/2011_01_01-2012_12_11.csv",fileEncoding = "UTF-8",sep=",",header = FALSE,stringsAsFactors=F)
+  corpus2010<-read.csv(file="/home/tobias/Schreibtisch/Newspaper Corpus/Ahram/ahram_dec2010.csv",fileEncoding = "UTF-8",sep=",",header = FALSE,stringsAsFactors=F)
 #    corpus2010<-corpus2010[corpus2010$V4!="",]
-# 
-#    ids<-1:dim(corpus2010)[1]
-#    uri<-paste("AH",corpus2010$V1,corpus2010$V2,corpus2010$V3,ids,sep = "")
-#    new.corpus<-data.frame(uri,corpus2010$V4 ,stringsAsFactors = F)
-#    
-#    
-#    write.table(new.corpus,col.names = FALSE,row.names = FALSE,"/home/tobias/Dropbox/Dokumente/islamicate2.0/reduced/ahram.csv",sep = ",",fileEncoding = "UTF-8",append = T)
-#    
+#    corpus2011<-corpus2011[corpus2011$V4!="",]
 #  
-#    
+#  # 
+# # 
+#    corpus2010<-f.replaceMonthNames(corpus2010,month.col = 2)
+#    corpus2011<-f.replaceMonthNames(corpus2011,month.col = 3)
+#   
+#     ids<-1:dim(corpus2010)[1]
+#     uri<-paste("AH",corpus2010$V1,SPRINTF(as.integer(corpus2010$V2)),SPRINTF(corpus2010$V3),"$",ids,sep = "")
+#     new.corpus<-data.frame(uri,corpus2010$V4 ,stringsAsFactors = F)
+# 
+#     write.table(new.corpus,col.names = FALSE,row.names = FALSE,"/home/tobias/Dropbox/Dokumente/islamicate2.0/reduced/ahram.csv",sep = ",",fileEncoding = "UTF-8",append = T)
+# 
+# 
+# 
 #     sp<-dim(corpus2010)[1]
 #     for(i in 1:5){
 # 
 #      month<-corpus2011[which(corpus2011$V3==i),]
 #      month<-month[month$V5!="",]
 #      ids<-(sp+1):(sp+dim(month)[1])
-#      uri<-paste("AH",month$V2,month$V3,month$V4,ids,sep = "")
+#      uri<-paste("AH",month$V2,SPRINTF(as.integer(month$V3)),SPRINTF(month$V4),"$",ids,sep = "")
 # 
 #      newCorpus<-data.frame(uri,month$V5,stringsAsFactors = F)
 # 
@@ -143,66 +135,85 @@ f.replaceMonthNames<- function(corpus,month.col=2){
 #    write.table(new.corpus,col.names = FALSE,row.names = FALSE,"/home/tobias/Dropbox/Dokumente/islamicate2.0/reduced/ahram.csv",sep = ",",fileEncoding = "UTF-8",append = T)
 
 
-   
- #   
- # corpus2010_11<-read.csv(file="/home/tobias/Dokumente/islamicate2.0/hw/newspaper_group/data/AlWatan/alwatan.csv",fileEncoding = "UTF-8",sep=",",header = FALSE,stringsAsFactors=F)
- # # alwatan hat keine daten für dec 2010!
- # corpus2010<-corpus2010_11[which(corpus2010_11$V1==2010),]# empty.
- # corpus2011<-corpus2010_11[which(corpus2010_11$V1==2011),]
- # 
- #     sp<-dim(corpus2010)[1]
- #     sp<-1
- #     for(i in 1:5){
- # 
- #      month<-corpus2011[which(corpus2011$V2==i),]
- #      month<-month[month$V4!="",]
- #      ids<-(sp+1):(sp+dim(month)[1])
- #      uri<-paste("AL",month$V1,month$V2,month$V3,ids,sep = "")
- # 
- #      newCorpus<-data.frame(uri,month$V4,stringsAsFactors = F)
- # 
- #      write.table(newCorpus,col.names = FALSE,row.names = FALSE,"/home/tobias/Dropbox/Dokumente/islamicate2.0/reduced/alwatan.csv",sep = ",",fileEncoding = "UTF-8",append = T)
- # 
- #     }
+# 
+#   corpus2010<-read.csv(file="/home/tobias/Schreibtisch/Newspaper Corpus/AlWatan/dec_alwatan.csv",fileEncoding = "UTF-8",sep=",",header = FALSE,stringsAsFactors=F)
+#   corpus2011<-read.csv(file="/home/tobias/Schreibtisch/Newspaper Corpus/AlWatan/alwatan.csv", fileEncoding = "UTF-8",sep=",",header = FALSE,stringsAsFactors=F)
+#   
+#   corpus2010<-corpus2010[corpus2010$V4!="",]
+#   corpus2011<-corpus2011[corpus2011$V4!="",]
+#   
+#   SPRINTF(corpus2010$V2)
+#   
+#   ids<-1:dim(corpus2010)[1]
+#   uri<-paste("AL",corpus2010$V1,SPRINTF(corpus2010$V2),SPRINTF(corpus2010$V3),"$",ids,sep = "")
+#   newCorpus<-data.frame(uri,corpus2010$V4,stringsAsFactors = F)
+#   write.table(newCorpus,col.names = FALSE,row.names = FALSE,"/home/tobias/Dropbox/Dokumente/islamicate2.0/reduced/alwatan.csv",sep = ",",fileEncoding = "UTF-8",append = T)
+#   
+#   
+#   # # alwatan hat keine daten für dec 2010!
+#  # corpus2010<-corpus2010_11[which(corpus2010_11$V1==2010),]# empty.
+#   corpus2011<-corpus2011[which(corpus2011$V1==2011),]
+# 
+#      sp<-dim(corpus2010)[1]
+#      sp<-1
+#      for(i in 1:5){
+# 
+#       month<-corpus2011[which(corpus2011$V2==i),]
+#       month<-month[month$V4!="",]
+#       ids<-(sp+1):(sp+dim(month)[1])
+#     uri<-paste("AL",month$V1,SPRINTF(month$V2),SPRINTF(month$V3),"$",ids,sep = "")
+# 
+#       newCorpus<-data.frame(uri,month$V4,stringsAsFactors = F)
+# 
+#       write.table(newCorpus,col.names = FALSE,row.names = FALSE,"/home/tobias/Dropbox/Dokumente/islamicate2.0/reduced/alwatan.csv",sep = ",",fileEncoding = "UTF-8",append = T)
+# 
+#      }
 
 
 
     
     
-corpus2011 <- read.csv("/home/tobias/Dropbox/Dokumente/islamicate2.0/almasralyoum/2011.csv", sep=",", header=FALSE,encoding = "UTF-8",quote="",stringsAsFactors=F)
-corpus2010 <- read.csv("/home/tobias/Dropbox/Dokumente/islamicate2.0/almasralyoum/2010.csv", sep=",", header=FALSE,encoding = "UTF-8",stringsAsFactors=F,quote = "")
+corpus2011 <- read.csv("/home/tobias/Schreibtisch/Newspaper Corpus/almasralyoum/2011.csv", sep="\t", header=FALSE,encoding = "UTF-8",quote="",stringsAsFactors=F)
+corpus2010 <- read.csv("/home/tobias/Schreibtisch/Newspaper Corpus/almasralyoum/2010.csv", sep="\t", header=FALSE,encoding = "UTF-8",quote="",stringsAsFactors=F)
+
+   corpus2010<-corpus2010[corpus2010$V2!="",]
+   corpus2011<-corpus2011[corpus2011$V2!="",]
 
 ## object text.v not found
-t2010<-corpus2010$V2[43940:length(corpus2010)]
-#t2010<-corpus2010$1[43940:length(corpus2010)]
+   
+#   dim(corpus2010)[1]
+   
+   ## das jahr startet bei 1 und nicht bei dem index, bei dem es eigentlich starten soll.
+   ## deswegen muss ich zunächst rausfinden, bei welchem index es startet.
+   ## und dann rechne ich startindex
+   corpus2010<-corpus2010[40488:dim(corpus2010)[1],]
+   corpus2011<- corpus2011[1:16692,] # unprecise, but anyway. 
+   
+   S6PRINTF <- function(x) sprintf("%06d", x)
+   SPRINTF <- function(x) sprintf("%02d", x)
+   
+   corpus2010$V1<-paste("AY",S6PRINTF(corpus2010$V1),sep="")
+   corpus2011$V1<-paste("AY",S6PRINTF(corpus2011$V1),sep="")
 
 
 
-t2011<- corpus2011$V2[1:18584]
-t2011.id<- corpus2011$V1[1:18584]
-
-till<-25994+length(t2010)
-  
-ids <- 25995: till
-
-newCorpus<-data.frame(ids,t2010,stringsAsFactors = F)
-      
-write.table(newCorpus,col.names = FALSE,row.names = FALSE,"/home/tobias/Dropbox/Dokumente/islamicate2.0/reducedfiles/almasralyoum.csv",sep = ",",fileEncoding = "UTF-8",append = T)
-    
+   write.table(corpus2010,col.names = FALSE,row.names = FALSE,"/home/tobias/Dropbox/Dokumente/islamicate2.0/reduced/almasralyoum.csv", sep="\t",fileEncoding = "UTF-8",append = F)
+   write.table(corpus2011,col.names = FALSE,row.names = FALSE,"/home/tobias/Dropbox/Dokumente/islamicate2.0/reduced/almasralyoum.csv", sep="\t",fileEncoding = "UTF-8",append = T)
 
 # library(shiny)
 # runApp('/home/tobias/Downloads/ToPan-master/')
 # options(shiny.maxRequestSize=30*1024^2)
  
 
-
+  
+   
 
 #########################################################################################################
 ###################################     TRANSLITERATION, STEMMING     ################################### 
 #########################################################################################################
 library(arabicStemR)
 
-corpus2011<-read.csv(file="/home/tobias/Dropbox/Dokumente/islamicate2.0/reduced/ahram.csv",fileEncoding = "UTF-8",sep=",",header = FALSE,stringsAsFactors=F,quote = "")
+corpus2011<-read.csv(file="/home/tobias/Dropbox/Dokumente/islamicate2.0/reduced/ahram.csv",fileEncoding = "UTF-8",sep=",",header = FALSE,stringsAsFactors=F,quote = '')
 
 ## gibt ja jeweils tupel zurück, ich brauche aber nur den text.
 out<-sapply(corpus2011$V2,myStem )

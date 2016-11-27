@@ -137,6 +137,30 @@ scrape.day.ahram<- function(day.to.observe){
   }# end of for-loop
 } # end of scrapeRaw-function
 
+scrape.article.alwatan <- function(homepage.url.article){
+  ## would be even better to pass filenames as vectors.
+  target.folder<-"/home/tobias/Dropbox/Dokumente/islamicate2.0/dec2010"
+  my.filename <- paste(target.folder,"/", gsub("/", "_", homepage.url.article),".html", sep = "")
+
+  if(!file.exists(my.filename)){
+   
+    tryCatch({
+      homepage.day.article<-read_html(homepage.url.article,encoding = "UTF-8")
+      write_xml(homepage.day.article,my.filename)
+      
+      sleep(0.1)}
+      ,error = function(e){
+        print(paste("error while loading",homepage.url.article,sep=" "))
+     
+      })
+    
+  }# end of file.exists
+  else{
+    print(paste("skip",homepage.url.article,"because i have it already.",sep=" "))
+  }
+}
+
+
 # e.g. facebook,twitter-links.
 filter_homepages.ahram<-function(homepages.v){
   # i should scrape everything first...

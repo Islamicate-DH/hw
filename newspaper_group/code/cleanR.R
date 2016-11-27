@@ -19,8 +19,8 @@ clean.almasryalyoum <- function(source.folder){
       
       title.c<- article.homepage %>% html_nodes(xpath="//font[@color='#AB0202'and @size='5']//b") %>% html_text()
       # date extraction see ahram
-      
-      text.c<-paste(article.homepage %>% html_nodes(xpath="//font[@size='2' and @face='Tahoma']//p") %>% html_text(),collapse = " ")
+      text.c <- article.homepage %>% html_nodes(xpath="//font[@size='2' and @face='Tahoma']//p") %>% html_text()
+      text.c<-paste(text.c,collapse = " ")
       
       
       ### dann haben wir halt erstmal kein datum.
@@ -36,10 +36,15 @@ clean.almasryalyoum <- function(source.folder){
       # year<-date[[1]][4]
       ## there seems to be "garbage" at the end of some texts. we should exclude non-arabic letter, i.e. a-Z
       
+      text.c <-sub("\"","",text.c)
+      title.c <- gsub("\"","",title.c)
       
       ## since all homepages look the same I can skip the if-statements (cf. al-watan.R)
-      write.table(data.frame(i,sub("\"","",text.c),gsub("\"","",title.c)),col.names = FALSE,row.names = FALSE,paste(source.folder,".csv",sep=""),sep = ",",quote = "",fileEncoding = "UTF-8",append = T)
-      i<-i+1
+      if(nchar(text.c)>10){
+      write.table(data.frame(i,text.c),col.names = FALSE,row.names = FALSE,paste(source.folder,".csv",sep=""),sep = "\t",fileEncoding = "UTF-8",append = T)
+      #write.table(data.frame(i,sub("\"","",text.c),gsub("\"","",title.c)),col.names = FALSE,row.names = FALSE,paste(source.folder,".csv",sep=""),sep = "\t",fileEncoding = "UTF-8",append = T)
+         i<-i+1
+      }
     },error =function(e){write(paste("page",my.filename,"could not be loaded",sep=" "),"log",append = TRUE )})
     
   }
@@ -108,6 +113,7 @@ clean.alwatan<- function(source.dir){
         text.c<-homepage %>%
           html_nodes("span#ctl00_ContentPlaceHolder1_lblDescription") %>% html_text()
         year<-str_sub(my.filename,-8,-5)
+        
         month<-str_sub(my.filename,-4,-3)
         day<-str_sub(my.filename,-2,-1)
       }
@@ -124,7 +130,7 @@ clean.alwatan<- function(source.dir){
           text.c<-homepage %>% html_nodes(" span#ctl00_ContentPlaceHolder1_LatestNews1_lblDescription.NewsTickerDescription") %>% html_text()
         }
       }
-      if(length(title.c)!=0){
+      if(length(text.c)!=0){
         # again, check whether there was a title an append the new data to the csv.
         write.table(data.frame(year,month,day,gsub("\"","",text.c),gsub("\"","",title.c),"Al-Watan",my.filename),col.names = FALSE,row.names = FALSE,"alwatan.csv",sep = ",",fileEncoding = "UTF-8",append = T)
       }else{
@@ -165,8 +171,10 @@ clean.hespress <- function(source.folder){
       text.c<-article.homepage %>%
         html_nodes("div#article_body p") %>% html_text()
       
+      text.c<-gsub("\"","",text.c)
+      title.c<-gsub("\"","",title.c)
       ## since all homepages look the same I can skip the if-statements (cf. al-watan.R)
-      write.table(data.frame(year,month,day,gsub("\"","",text.c),gsub("\"","",title.c),"Hespress",my.filename),col.names = FALSE,row.names = FALSE,paste(source.folder,".csv",sep=""),sep = ",",fileEncoding = "UTF-8",append = T)
+      write.table(data.frame(year,month,day,text.c,title.c),col.names = FALSE,row.names = FALSE,paste(source.folder,".csv",sep=""),sep = "\t",fileEncoding = "UTF-8",append = T)
     },error =function(e){write(paste("page",my.filename,"could not be loaded",sep=" "),"log",append = TRUE )})
     
   }
@@ -175,3 +183,52 @@ clean.hespress <- function(source.folder){
   
 }
 
+
+clean.thawra <- function(source.folder){
+  
+  for (my.filename in dir(source.folder,full.names = TRUE, no.. = TRUE)){
+    
+  if(length(grep(pattern = "cat",my.filename, invert = TRUE)>1)){
+    
+    
+    tryCatch({
+      
+      article.homepage<-read_html(my.filename,encoding = "Windows-1256")
+      text.c<-paste(article.homepage %>%html_nodes("font p")  %>% html_text(),collapse = " ", sep = " ")
+      title.c<-article.homepage %>%html_nodes(xpath = "//font[@color='0000C0'][@size=5]")  %>% html_text()
+      
+      ## works because homepage is not written very well...
+      date.sec<-article.homepage %>%  html_nodes(xpath = "//p[@align='right']")  %>% html_text()
+      s<-strsplit(date.sec, " ")[[1]]
+      r<-s[grep("-",s)] ## splitting string with date and grabbing elements
+      
+      my.date<-gsub("[^0-9||-]","",r)
+      my.date<-my.date[nchar(my.date)>=5]
+      
+      my.date<- strsplit(my.date,"-")[[1]]
+      day<-my.date[1];  month<-my.date[2];   year<-my.date[3]
+      
+      text.c<- iconv(to="UTF-8",x = text.c)# kein from
+      title.c<-iconv(to="UTF-8",x = text.c)
+      #text.c <-sub("\"","",text.c)
+      #title.c <- gsub("\"","",title.c)
+      
+      tryCatch({
+        if(nchar(text.c)>1){
+          write.table(data.frame(year,month,day,text.c),col.names = FALSE,row.names = FALSE,paste(source.folder,".csv",sep=""),sep = ",",fileEncoding = "UTF-8",append = T)
+          
+          #write.table(data.frame(year,month,day,gsub("\"","",text.c),gsub("\"","",title.c),"Thawra",file.to.clean),col.names = FALSE,row.names = FALSE,paste(source.folder,".csv",sep=""),sep = ",",fileEncoding = "UTF-8",append = T)
+        }
+      },error =function(e){
+        print(paste("page",my.filename,"could not be loaded",sep=" "))
+      }   )
+      
+    },error =function(e){
+      write(paste("page",my.filename,"could not be loaded",sep=" "),"log",append = TRUE )
+    })
+    
+    
+    
+  }
+  }
+}

@@ -5,8 +5,8 @@ for(i in 1:length(libs)){
 }
 
 source("scrapeR.R")
-source("cleanR.R")
+source("/home/tobias/Dokumente/islamicate2.0/hw/newspaper_group/code/cleanR.R")
 
-source.folder<-"/home/tobias/Downloads/almasryalyoum/2010"
+source.folder<-"/home/tobias/Schreibtisch/2010"
 clean.almasryalyoum(source.folder)
 

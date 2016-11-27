@@ -23,4 +23,31 @@ getLinks <- function(homepage.url,link.element){
   homepages.v<-homepages.v[homepages.v!=""]
   return(homepages.v)
 }
+# padding.
+SPRINTF <- function(x) sprintf("%02d", x)
 
+
+f.replaceMonthNames<- function(corpus,month.col=2){
+  Sys.setlocale("LC_TIME", "ar_AE.utf8");
+  month.dates<-seq(as.Date("2012-01-01"), as.Date("2012-12-31"), "months")
+  month.names<-format(month.dates, "%B")
+  
+  for(i in 1:11){
+    corpus[which(corpus[,month.col]==month.names[i]),month.col]<-i
+  }
+  
+  corpus[which(corpus[,month.col]== "دجنبر"),month.col]<-12
+  corpus[which(corpus[,month.col]== "ديسمبر"),month.col]<-12
+  corpus[which(corpus[,month.col]== "نونبر"),month.col]<-11
+  corpus[which(corpus[,month.col]== "اكتوبر"),month.col]<-10
+  
+  
+  corpus[which(corpus[,month.col]== "شتنبر"),month.col]<-9
+  corpus[which(corpus[,month.col]== "غشت"),month.col]<-8
+  corpus[which(corpus[,month.col]== "غشت"),month.col]<-8
+  corpus[which(corpus[,month.col]== "يوليوز"),month.col]<-5
+  corpus[which(corpus[,month.col]== "ابريل"),month.col]<-4
+  
+  
+  return(corpus)
+}
