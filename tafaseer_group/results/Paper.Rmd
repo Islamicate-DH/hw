@@ -1,14 +1,26 @@
 ---
+<<<<<<< HEAD
 title: An Exploratory Data Analysis of 18 Tafasīr From the Early 8th to the Late
   14th Century and Across a Wide Geographical Area Using Corpus Linguistical Methods
 author: "F. Blunck, S. Bukhari, M. Foradi, T. D. Keppen, J. R. Schmid"
 output:
-  html_notebook:
-    toc: yes
+=======
+title: An Exploratory Data Analysis of 18 Tafasīr From the Early 8th to the Late 14th
+  Century and Across a Wide Geographical Area Using Corpus Linguistical Methods
+author: "F. Blunck, S. Bukhari, M. Foradi, T. D. Keppen, J. R. Schmid"
+output:
   html_document:
+    toc: yes
+>>>>>>> 94d8e1af6ab5551afbd6c0c1909304e02c94731e
+  html_notebook:
     toc: yes
   pdf_document:
     toc: yes
+<<<<<<< HEAD
+  pdf_document:
+    toc: yes
+=======
+>>>>>>> 94d8e1af6ab5551afbd6c0c1909304e02c94731e
 ---
 
 # 1 The corpus
@@ -17,7 +29,7 @@ output:
 
 ## 1.2 Data extraction and transformation into processable outer form
 
-Yo, extraction was simple like tha':
+Yo, extraction was simple like tha' أخي:
 
 ```{R}
 print(paste('Hello', 'world', '!'))

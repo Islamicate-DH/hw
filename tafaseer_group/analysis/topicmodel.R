@@ -1,8 +1,8 @@
 library(tm)
 library(topicmodels)
 
-filenames <- dir() # TODO: ask thom where he had this running? the txt folder?
-files <- lapply(filenames,readLines)
+filenames <- dir('../../corpora/altafsir_com/processed/plain/')
+files <- lapply(filenames, readLines)
 docs <- Corpus(VectorSource(files))
 
 #Create document-term matrix-Takes awhile
@@ -45,11 +45,11 @@ write.csv(topicProbabilities,file=paste("LDAGibbs",k,"TopicProbabilities.csv"))
 
 #Find relative importance of top 2 topics
 topic1ToTopic2 <- lapply(1:nrow(dtm),function(x)
-sort(topicProbabilities[x,])[k]/sort(topicProbabilities[x,])[k-1])
+  sort(topicProbabilities[x,])[k]/sort(topicProbabilities[x,])[k-1])
 
 #Find relative importance of second and third most important topics
 topic2ToTopic3 <- lapply(1:nrow(dtm),function(x)
-sort(topicProbabilities[x,])[k-1]/sort(topicProbabilities[x,])[k-2])
+  sort(topicProbabilities[x,])[k-1]/sort(topicProbabilities[x,])[k-2])
 
 #write to file
 write.csv(topic1ToTopic2,file=paste("LDAGibbs",k,"Topic1ToTopic2.csv"))
