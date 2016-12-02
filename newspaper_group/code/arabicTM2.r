@@ -44,7 +44,7 @@ enableJIT(3)
 
 
 
- base_corpus <- read.table("/home/tobias/Dropbox/Dokumente/islamicate2.0/reduced/hespress.csv", sep=",", header=FALSE,encoding = "UTF-8",stringsAsFactors = F)
+ base_corpus <- read.table("/home/tobias/Dropbox/Dokumente/islamicate2.0/reduced/hespress_c.csv", sep=",", header=FALSE,encoding = "UTF-8",stringsAsFactors = F)
 
 research_corpus <- as.character(base_corpus$V2)
  output_names <- as.character(base_corpus$V1)
@@ -55,6 +55,17 @@ research_corpus <- gsub("[[:cntrl:]]", " ", research_corpus)  # replace control 
 research_corpus <- gsub("^[[:space:]]+", "", research_corpus) # remove whitespace at beginning of documents
 research_corpus <- gsub("[[:space:]]+$", "", research_corpus) # remove whitespace at end of documents
 research_corpus <- gsub("[0-9]", "", research_corpus) #remove numbers
+
+#research_corpus<-sapply(research_corpus, gsub, "[[:ascii]]","", perl=T)
+
+
+# research_corpus<-sapply(research_corpus,gsub,"[[:punct:]]", " ")  # replace punctuation with space
+# research_corpus<-sapply(research_corpus,"[[:cntrl:]]", " ", research_corpus)  # replace control characters with space
+# research_corpus<-sapply(research_corpus,"^[[:space:]]+", "", research_corpus) # remove whitespace at beginning of documents
+# research_corpus<-sapply(research_corpus,"[[:space:]]+$", "", research_corpus) # remove whitespace at end of documents
+# research_corpus<-sapply(research_corpus, gsub, "[0-9]"," ")
+
+
 
 
 # tokenize on space and output as a list:
@@ -84,7 +95,7 @@ term.table <- sort(term.table, decreasing = TRUE)
 
 
 # remove terms that are stop words or occur fewer than "occurenses" times:
-occurences <- 5
+occurences <- 10
 
 del <- names(term.table) %in% stop_words | term.table < occurences 
 term.table <- term.table[!del]

@@ -8,39 +8,39 @@ source("/home/tobias/Dokumente/islamicate2.0/hw/newspaper_group/code/basic_funct
 
 # 
 # # ####
-#  corpus2011<-read.csv(file="/home/tobias/Schreibtisch/Newspaper Corpus/Hespress/hespress2010.csv",fileEncoding = "UTF-8",sep=",",header = FALSE,stringsAsFactors=F )
-#  corpus2010<-read.csv(file="/home/tobias/Schreibtisch/Newspaper Corpus/Hespress/hespress2011.csv",fileEncoding = "UTF-8",sep=",",header = FALSE,stringsAsFactors=F)
-#  corpus2010<-corpus2010[corpus2010$V4!="",]
-#  corpus2011<-corpus2011[corpus2011$V4!="",]
+ corpus2011<-read.csv(file="/home/tobias/Schreibtisch/Newspaper Corpus/Hespress/hespress2011.csv",fileEncoding = "UTF-8",sep=",",header = FALSE,stringsAsFactors=F )
+ corpus2010<-read.csv(file="/home/tobias/Schreibtisch/Newspaper Corpus/Hespress/hespress2010.csv",fileEncoding = "UTF-8",sep=",",header = FALSE,stringsAsFactors=F)
+ corpus2010<-corpus2010[corpus2010$V4!="",]
+ corpus2011<-corpus2011[corpus2011$V4!="",]
 #  # 
 # # 
-#  corpus2011<-f.replaceMonthNames(corpus2011,month.col = 2)
-#  corpus2010<-f.replaceMonthNames(corpus2010,month.col = 2)
+  corpus2011<-f.replaceMonthNames(corpus2011,month.col = 2)
+  corpus2010<-f.replaceMonthNames(corpus2010,month.col = 2)
 # # 
 # # 
 # # 
 # 
-#  dec<-corpus2010[which(corpus2010$V2==12),]
+  dec<-corpus2010[which(corpus2010$V2==12),]
 # 
 # 
-# ids<-1:dim(dec)[1]
-#  uri<-paste("HP",dec$V1,dec$V2,SPRINTF(dec$V3),"$",ids,sep = "")
-# 
-#  new.corpus<-data.frame(uri,dec$V4 ,stringsAsFactors = F)
-#  write.table(new.corpus,col.names = FALSE,row.names = FALSE,"/home/tobias/Dropbox/Dokumente/islamicate2.0/reduced/hespress.csv",sep = ",",fileEncoding = "UTF-8",append = T)
-# # 
-#  sp<-dim(dec)[1]
-# for(i in 1:5){
-#   month<-corpus2011[which(corpus2011$V2==i),]
-# 
-# 
-#   ids<-(sp+1):(sp+dim(month)[1])
-#   sp<-sp+dim(month)[1]
-# 
-#   uri<-paste("HP",month$V1,SPRINTF(as.integer(month$V2)),SPRINTF(month$V3),ids,sep = "")
-#   new.corpus<-data.frame(uri,month$V4 ,stringsAsFactors = F)
-#   write.table(new.corpus,col.names = FALSE,row.names = FALSE,"/home/tobias/Dropbox/Dokumente/islamicate2.0/reduced/hespress.csv",sep = ",",fileEncoding = "UTF-8",append = T)
-# }
+ids<-1:dim(dec)[1]
+ uri<-paste("HP",dec$V1,dec$V2,SPRINTF(dec$V3),"$",ids,sep = "")
+
+ new.corpus<-data.frame(uri,dec$V4 ,stringsAsFactors = F)
+ write.table(new.corpus,col.names = FALSE,row.names = FALSE,"/home/tobias/Dropbox/Dokumente/islamicate2.0/reduced/hespress.csv",sep = ",",fileEncoding = "UTF-8",append = F)
+
+ sp<-dim(dec)[1]
+for(i in 1:5){
+  month<-corpus2011[which(corpus2011$V2==i),]
+
+
+  ids<-(sp+1):(sp+dim(month)[1])
+  sp<-sp+dim(month)[1]
+
+  uri<-paste("HP",month$V1,SPRINTF(as.integer(month$V2)),SPRINTF(month$V3),"$",ids,sep = "")
+  new.corpus<-data.frame(uri,month$V4 ,stringsAsFactors = F)
+  write.table(new.corpus,col.names = FALSE,row.names = FALSE,"/home/tobias/Dropbox/Dokumente/islamicate2.0/reduced/hespress.csv",sep = ",",fileEncoding = "UTF-8",append = T)
+}
 
   corpus<-read.csv(file="/home/tobias/Dropbox/Dokumente/islamicate2.0/reduced/hespress.csv",fileEncoding = "UTF-8",sep=",",header = FALSE,stringsAsFactors=F)
 
@@ -61,13 +61,15 @@ source("/home/tobias/Dokumente/islamicate2.0/hw/newspaper_group/code/basic_funct
   
   
 
-  corpus2010_11<-read.csv(file="/home/tobias/Schreibtisch/tharwa.csv",encoding = "UTF-8",sep=",",header = FALSE,stringsAsFactors=F, comment.char = "")
+  corpus2010_11<-read.csv(file="/home/tobias/Schreibtisch/thawra2010_11.csv",encoding = "UTF-8",sep=",",header = FALSE,stringsAsFactors=F, comment.char = "")
 
     corpus2010<-  corpus2010_11[which(corpus2010_11$V1==2010),]
    corpus2011<-corpus2010_11[which(corpus2010_11$V1==2011),]
     corpus2010<-corpus2010[corpus2010$V4!="",]
     corpus2011<-corpus2011[corpus2011$V4!="",]
 
+    corpus2011$V4<- sapply(corpus2011$V4, paste, collapse = "", sep = "")
+    corpus2010$V4<-  sapply(corpus2010$V4, paste, collapse = "", sep = "")
 #
  dec<-corpus2010[which(corpus2010$V2==12),]
 
