@@ -1,26 +1,21 @@
-##                                                                        
-##                            THAWRA
-##
-## 
-
+# Copyright Tobias Wenzel
+# In Course: Islamicate World 2.0
+# University of Maryland, University Leipzig
+#
+# File description:
+#     Thawra main file.
 
 rm(list=ls())
 
-libs<-c("rvest","stringr","tidyr","methods","beepr")
-for(i in 1:length(libs)){
-  suppressPackageStartupMessages(library(libs[i], character.only = TRUE))
-}
 source("basic_functions.R")
-source("/home/tobias/Dokumente/islamicate2.0/hw/newspaper_group/code/cleanR.R")
-
-# actually not needed.
-#setwd("~/Dokumente/islamicate2.0/project/hespress") # setting working directory
-# for scraping
-target.folder<- "~/Dokumente/islamicate2.0/hw/corpora/newspaper_archive/tharwa"
-base.url<-"http://thawra.sy/"
+source("cleanR.R")
+source("scrapeR.R")
 
 tharwa.urls <- scan("/home/tobias/Dokumente/islamicate2.0/hw/newspaper_group/thawra_urls_2014.txt", what="", sep="\n")
-lapply(tharwa.urls,scrape.day.thawra)
 
-source.folder<- "/home/tobias/Schreibtisch/tharwa"
+target.folder<- "~/Dokumente/hw/corpora/newspaper_archive/tharwa"
+lapply(tharwa.urls, scrape.day.thawra, target.folder)
+
+
+source.folder<- target.folder
 clean.thawra(source.folder)

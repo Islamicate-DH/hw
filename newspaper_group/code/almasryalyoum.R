@@ -1,12 +1,15 @@
+# Copyright Tobias Wenzel
+# In Course: Islamicate World 2.0
+# University of Maryland, University Leipzig
+#
+# File description:
+#     Al-Masri al-Youm main file.
+# 
 
-libs<-c("rvest","stringr","tidyr","optparse","methods","beepr")
-for(i in 1:length(libs)){
-  suppressPackageStartupMessages(library(libs[i], character.only = TRUE))
-}
 
-source("scrapeR.R")
-source("/home/tobias/Dokumente/islamicate2.0/hw/newspaper_group/code/cleanR.R")
+# source("scrapeR.R")  # was downloaded with wget
+source("cleanR.R")
 
-source.folder<-"/home/tobias/Schreibtisch/2010"
+source.folder<-"/home/tobias/Schreibtisch/almasri2010"
 clean.almasryalyoum(source.folder)
 

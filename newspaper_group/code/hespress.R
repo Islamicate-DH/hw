@@ -1,28 +1,16 @@
-##                                                                        
-##                            Hespress Scraper
-##
-## 
-
-# sleep, generateTimeSequence
-
-
+# Copyright Tobias Wenzel
+# In Course: Islamicate World 2.0
+# University of Maryland, University Leipzig
+#
+# File description:
+#     Hespress main file.
+# 
 rm(list=ls())
 
-libs<-c("rvest","stringr","tidyr","methods","beepr","curl")
-for(i in 1:length(libs)){
-  suppressPackageStartupMessages(library(libs[i], character.only = TRUE))
-}
 
 source("basic_functions.R")
 source("scrapeR.R")
 source("cleanR.R")
-
-
-source("/home/tobias/Dokumente/islamicate2.0/hw/newspaper_group/code/cleanR.R")
-###############################################################################
-##                          CALLING THE SCRIPTS
-###############################################################################
-
 
 
 ## First I set a time-sequence which I want to download. Here I chose 1 year.
@@ -35,17 +23,9 @@ hp.base<-"http://www.hespress.com/archive/"
 days.to.scrape.url.v<-sapply(hp.base,paste,days.to.scrape,"/index.1.html",sep="")
 ## The function to scrape the website can be called for each day with sapply.
 
+target.folder <- "~/Schreibtisch/hespress2010"
+sapply(days.to.scrape.url.v, scrape.day.hespress, target.folder)
 
-sapply(days.to.scrape.url.v, scrape.day.hespress)
 
-
-option_list = list(
-  make_option(
-    c('-b', '--day'),
-    action='store', default=NA, type='character',
-    help='Where to start downloading.')
-); o = parse_args(OptionParser(option_list=option_list))
-
-#scrape.day(o$day)
-source.folder<- "/home/tobias/Schreibtisch/hespress2010"
+source.folder<- target.folder
 clean.hespress(source.folder)
