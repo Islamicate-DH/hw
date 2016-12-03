@@ -1,0 +1,105 @@
+* Documentation 
+The following section discribes the steps of scraping and cleaning as
+well as the explorative data analysis.  In this context scraping is
+the step of automated downloading raw HTML-files from a specific
+source. Cleaning discribes the extraction of selected text elements,
+i.e. the article itself, the title or date it was published. Although
+it is possible to combine the steps and directly extract the article
+we chose this method to be able to access the raw files in case of
+errors during the scraping process.
+
+ Since this project aims to do research not on one specific newspaper
+homepage but rather a whole selection, cf. chapter(), the process of
+scraping homepages and extracting data or cleaning differs for each
+site. However the method as such stays the same, thus can be explained
+using pseudo-code. The commented source code can be found on the
+attached CD. The functions used for scraping are combined in the file
+scrapeR.R and the functions used to extract the text elements can be
+found in the file cleanR.R
+
+
+
+** Scraping
+
+function scrape.day.Newspaper
+Input:
+    date or direct link
+Output:
+    Raw HTML-files
+
+if date as input:
+  main <- load main page
+  article.links <- extract links(main)
+  for link in article.links:
+    save as HTML
+  end for
+else if direct link as input:
+  article <- load article
+  save(article.html)
+end if
+
+The packages mostly used during scraping are rvest and tidyr (cite). rvest
+provides functionalities making it possible to download homepages
+as xml. tidyr is used to pipe the output of one R command into another
+input. This makes the code it easier to read. Both packages are used during
+scraping and cleaning.
+After loading the packages and the functions implemented in scrapeR.R
+we first set a time sequence we want to scrape. This sequence consists
+out of date strings. In the following, the function scrape.$NEWSPAPER
+is called usually with an sapply. sapply applies a function on each
+element of a vector.  Depending on the homepage-structure we would
+first navigate to the main page of the newspaper and collect all links
+to articles. In the next step these links are loaded and the resulting
+homepage is saved in a target folder. Errors occuring during the scraping
+are noted in a log file.
+
+
+** Cleaning
+
+clean.$NEWSPAPER
+
+Input:
+   source folder
+Output:
+   csv file
+
+for homepage in source folder:
+   article.homepage <- load html
+   dateString <- getDateElements('html-node')
+   year, month, day <- extractDate(dateString)
+   article <- getArticleElements('html-node')
+   save as csv(year, month, day, article)
+end for
+
+To make the data format as easy as possible only extracted each
+article and corresponding date (if available). This enables us to
+identify each article with an uri, an uniform resource identifier
+consisting out of a short form of the newspaper (shown in table), the
+date as concatinated sting without seperators and an index starting at
+the first day of our chosen timespan. HP20101201$1 would identify an
+article written on the 1st of December 2010. Al Masr al Yayoum only
+uses arabic numerals making it difficult to extract them as
+numbers. In this case we just used an index. Other pages like Ahram
+used month names instead of numbers, thus had to be converted using a
+self written function replaceMonthNames (basicfunctions.R).
+
+HP - Hespress
+AL - Al Watan
+AH - Ahram
+TH - Thawra
+AY  - Al Masralyayoum 
+
+The identifiers and the articles are saved in the cross plattform
+format csv (comma-seperated values).  Having saved all corresponding
+data in the target folder the data is ready to be extracted. The
+extraction-function expects a source-folder. Each file in this folder
+is first loaded by R. Then we navigate to preselected HTML-nodes and
+extract the article fragments as well as the date. If the page was
+indeed an article, the elements are appended to a target csv file.
+Any files which do not contain an article are noted in a log file.
+The final renaming which results in the format explained in the
+previous paragraph can now be applied (This was done in an extra step,
+because we decided to narrow down the timespan and change the format
+of the uri).
+
+** Explorative data analysis

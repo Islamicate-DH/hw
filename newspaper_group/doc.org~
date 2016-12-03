@@ -1,0 +1,12 @@
+* Documentation 
+The following section discribes the steps of scraping and cleaning as well as the explorative data analysis.
+In this context scraping is the step of automated downloading raw HTML-files from a specific source. Cleaning discribes 
+the extraction of selected text elements, i.e. the article itself, the title or date it was published.
+Since this project aims to do research not on one specific newspaper
+homepage but rather a whole selection, cf. chapter(), the process of scraping homepages and
+extracting data or cleaning differs for each site. However the method as such stays the same, thus can
+be explained using pseudo-code.
+
+** Scraping
+** Cleaning
+** Explorative data analysis
