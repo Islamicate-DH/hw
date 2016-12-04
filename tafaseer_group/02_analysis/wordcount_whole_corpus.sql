@@ -5,7 +5,7 @@ SELECT
   --
   (SUBSTR('00'||category_id,-2,2) ||'-'|| SUBSTR('00'||author_id,-2,2))
     AS author_id,
-    author_name,
+    U.author_name,
   --
   -- QUR'AN PASSAGE:
   -- the way its usually given in literature
@@ -17,11 +17,11 @@ SELECT
   -- we have to use a condition here to get a good value
   -- http://stackoverflow.com/questions/3293790/query-to-count-words-sqlite-3
   --
-  (CASE WHEN LENGTH(text) >= 1
+  (CASE WHEN LENGTH(`text`) >= 1
         THEN 
-          (LENGTH(text) - LENGTH(REPLACE(text, ' ', '')) + 1)
+          (LENGTH(`text`) - LENGTH(REPLACE(`text`, ' ', '')) + 1)
         ELSE
-          (LENGTH(text) - LENGTH(REPLACE(text, ' ', '')))
+          (LENGTH(`text`) - LENGTH(REPLACE(`text`, ' ', '')))
         END)
     AS words_spent,
   --
@@ -30,35 +30,24 @@ SELECT
   -- need condition inside of it again so leaving that be as it
   -- would really push the running time of the query
   --
-  (SELECT SUM(LENGTH(text)) FROM cts_units GROUP BY category_id, author_id)
-    AS author_charcount,
+  (W.words)
+    AS author_wordcount,
   --
-  -- RATIO BETWEEN PREVIOUS TWO NUMBERS:
-  -- getting the ratio would just be a simple matter of
+  -- PERCENTAGE OF AAYA WORDCOUNT WRT AUTHOR WORDCOUNT:
+  -- getting the ratio is just a simple matter of
   -- dividing the smaller of the two numbers (words spent
-  -- on the aaya) by the larger one (characters spent on
-  -- the whole Quran) - unfortunately we must repeat both
-  -- calculations here...
+  -- on the aaya) by the larger one (words spent on the
+  -- whole of the Quran) - unfortunately we must repeat
+  -- the words_spent calculation here
   --
-  (CAST((CASE WHEN LENGTH(text) >= 1
+  ROUND(100 * ((CASE WHEN LENGTH(`text`) >= 1
         THEN 
-          (LENGTH(text) - LENGTH(REPLACE(text, ' ', '')) + 1)
+          (LENGTH(`text`) - LENGTH(REPLACE(`text`, ' ', '')) + 1)
         ELSE
-          (LENGTH(text) - LENGTH(REPLACE(text, ' ', '')))
-        END) AS FLOAT)
-      -- Don't miss the division, it's hiding right here!
-      /
-  ((SELECT SUM(LENGTH(text)) 
-    FROM cts_units 
-    GROUP BY category_id, author_id)
-    -- Dividing charcount by 6 so the ratio doesn't come
-    -- out extremely small. For German my feeling for avg.
-    -- word length in a big corpus would have been 10, for
-    -- Arabic 6 sounds like a sensible number (3-4 root
-    -- chars usually, lots of meem at the beginning, lots
-    -- of alif or ya in the middle, lots of tamarbouta at
-    -- the end.
-    / 6))
-    AS ratio
-FROM cts_units 
-ORDER BY ratio, words_spent, passage ASC;
+          (LENGTH(`text`) - LENGTH(REPLACE(`text`, ' ', '')))
+        END) * 1.0 / W.words * 1.0), 5)
+    AS percentage
+FROM cts_units AS U 
+JOIN wordcounts_by_author AS W 
+  ON U.author_name=W.author_name
+ORDER BY U.author_name, percentage, words_spent, passage ASC;
