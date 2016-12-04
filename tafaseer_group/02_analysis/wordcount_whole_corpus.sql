@@ -5,6 +5,7 @@ SELECT
   --
   (SUBSTR('00'||category_id,-2,2) ||'-'|| SUBSTR('00'||author_id,-2,2))
     AS author_id,
+    author_name,
   --
   -- QUR'AN PASSAGE:
   -- the way its usually given in literature
