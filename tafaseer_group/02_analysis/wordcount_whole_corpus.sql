@@ -58,7 +58,7 @@ SELECT
     -- chars usually, lots of meem at the beginning, lots
     -- of alif or ya in the middle, lots of tamarbouta at
     -- the end.
-    / 10))
+    / 6))
     AS ratio
 FROM cts_units 
 ORDER BY ratio, words_spent, passage ASC;
