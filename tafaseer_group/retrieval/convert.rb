@@ -18,7 +18,7 @@ require_relative 'lib/numeric_to_hindi'
 
 ActiveRecord::Base.establish_connection(
   adapter: 'sqlite3',
-  database: '../../corpora/altafsir_com/processed/corpus.sqlite3'
+  database: '../../corpora/altafsir_com/processed/corpus3.sqlite3'
 )
 
 class CTSUnit < ActiveRecord::Base
@@ -33,7 +33,7 @@ class CTSUnit < ActiveRecord::Base
   #   category_id INTEGER NOT NULL, 
   #   author_id   INTEGER NOT NULL, 
   #   sura_id     INTEGER NOT NULL,
-  #   aaya_id     NOT NULL, 
+  #   aaya_id     INTEGER NOT NULL
   # );
   default_scope {order('id ASC')}
 end
@@ -141,19 +141,25 @@ class AlTafsirYAMLFiles
   end
 
   def cts_sqlite_writeline(madhab, tafseer, line_no)
-    return unless urn = urn(line_no)
-    CTSUnit.create(
-      cts_urn: urn,
-      text: remove_specialchars(@hash['text']),
-      label:       @hash['aaya'],
-      title:       @hash['meta_title'],
-      author_name: @hash['meta_author'],
-      author_era:  @hash['meta_year'],
-      category_id: madhab,
-      author_id:   tafseer,
-      sura_id:     @hash['position_sura'].to_i,
-      aaya_id:     @hash['position_aaya'].to_i
-    )
+    current_txt = Pathname("../../corpora/altafsir_com/processed/plain/complete/%03d-%03d.txt" % [madhab, tafseer])
+    return unless File.exist? current_txt
+    begin
+      CTSUnit.create(
+        cts_urn: urn(line_no),
+        text: remove_specialchars(@hash['text']),
+        label:       @hash['aaya'],
+        title:       @hash['meta_title'],
+        author_name: @hash['meta_author'],
+        author_era:  @hash['meta_year'],
+        category_id: @hash['position_madhab'],
+        author_id:   @hash['position_tafsir'],
+        sura_id:     @hash['position_sura'].to_i,
+        aaya_id:     @hash['position_aaya'].to_i
+      )
+    rescue Exception => e
+      puts "INSERT failed: #{e.inspect}"
+      return
+    end
   end
 
   def html5_addline
@@ -252,7 +258,7 @@ class AlTafsirYAMLFiles
           cts_csv_writeline(m, t, i) if @formats[:csv]
           cts_csv_writeline(m, t, i, nospecialchars: true) if @formats[:csv_nospecialchars]
           cts_sqlite_writeline(m, t, i) if @formats[:sqlite]
-          html5_addline if @formats[:plain] || @formats[:plain_nohadith] || formats[:other]
+          html5_addline if @formats[:plain] || @formats[:plain_nohadith] || @formats[:other]
         end # sura, aaya
         html_file = html5_write_unless_exists(m, t)
         plain_text_write(html_file, m, t) if @formats[:plain]
