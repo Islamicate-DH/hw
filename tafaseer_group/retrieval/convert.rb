@@ -140,22 +140,26 @@ class AlTafsirYAMLFiles
     end
   end
 
+  # afterwards may need to do:
+  # delete from cts_units where (category_id || '-' || author_id) = '1-1' and coalesce(author_name, '') = '';
   def cts_sqlite_writeline(madhab, tafseer, line_no)
     current_txt = Pathname("../../corpora/altafsir_com/processed/plain/complete/%03d-%03d.txt" % [madhab, tafseer])
     return unless File.exist? current_txt
     begin
-      CTSUnit.create(
-        cts_urn: urn(line_no),
-        text: remove_specialchars(@hash['text']),
-        label:       @hash['aaya'],
-        title:       @hash['meta_title'],
-        author_name: @hash['meta_author'],
-        author_era:  @hash['meta_year'],
-        category_id: @hash['position_madhab'],
-        author_id:   @hash['position_tafsir'],
-        sura_id:     @hash['position_sura'].to_i,
-        aaya_id:     @hash['position_aaya'].to_i
-      )
+      if _urn = urn(line_no)
+        CTSUnit.create(
+          cts_urn:     _urn,
+          text: remove_specialchars(@hash['text']),
+          label:       @hash['aaya'],
+          title:       @hash['meta_title'],
+          author_name: @hash['meta_author'],
+          author_era:  @hash['meta_year'],
+          category_id: @hash['position_madhab'],
+          author_id:   @hash['position_tafsir'],
+          sura_id:     @hash['position_sura'].to_i,
+          aaya_id:     @hash['position_aaya'].to_i
+        )
+      end
     rescue Exception => e
       puts "INSERT failed: #{e.inspect}"
       return
