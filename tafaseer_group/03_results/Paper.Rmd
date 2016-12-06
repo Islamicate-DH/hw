@@ -1,0 +1,84 @@
+---
+<<<<<<< HEAD
+title: An Exploratory Data Analysis of 18 Tafasīr From the Early 8th to the Late
+  14th Century and Across a Wide Geographical Area Using Corpus Linguistical Methods
+author: "F. Blunck, S. Bukhari, M. Foradi, T. D. Keppen, J. R. Schmid"
+output:
+=======
+title: An Exploratory Data Analysis of 18 Tafasīr From the Early 8th to the Late 14th
+  Century and Across a Wide Geographical Area Using Corpus Linguistical Methods
+author: "F. Blunck, S. Bukhari, M. Foradi, T. D. Keppen, J. R. Schmid"
+output:
+  html_document:
+    toc: yes
+>>>>>>> 94d8e1af6ab5551afbd6c0c1909304e02c94731e
+  html_notebook:
+    toc: yes
+  pdf_document:
+    toc: yes
+<<<<<<< HEAD
+  pdf_document:
+    toc: yes
+=======
+>>>>>>> 94d8e1af6ab5551afbd6c0c1909304e02c94731e
+---
+
+# 1 The corpus
+
+## 1.1 Data origin and possible intentions behind its compilation
+
+## 1.2 Data extraction and transformation into processable outer form
+
+Yo, extraction was simple like tha' أخي:
+
+```{r}
+print(paste('Hello', 'world', '!'))
+```
+
+## 1.3 Authors of the 18 works
+
+### 1.3.1  d. 728: Jarir ibn Atiyah (Yamamah, Damascus)
+
+Dude's our oldest homie, 'n he swag man! Like, dude's not only a *mufassir*, naw, he actually a real poet, too, 'n know how to do some satire, ain't that cool? ???????????? ???????? ???? ????????????????
+
+### 1.3.2  d. 925: Muhammad ibn Zakariya al-Razi (Rey)
+### 1.3.3  d. 923: Al-Tabari (Amol-Baghdad)
+### 1.3.4  d. 971: Abū Ja'far al-Khāzin (Iran?)
+### 1.3.5  d. 1044: Al-Baghawi (?)
+### 1.3.6  d. 1058: Al-Mawardi (Basrah-Baghdad)
+### 1.3.7  d. 1142: Abu Hafs Umar an-Nasafi (Nakhshab-Samarqand)
+### 1.3.8  d. 1144: Al-Zamakhshari (Kwharezm-Mecca-Khwarezm)
+### 1.3.9  d. 1201: Ibn al-Jawzi (Baghdad)
+### 1.3.10 d. 1261: Ibn 'Abd as-Salam (Damascus-Egypt)
+### 1.3.11 d. 1273: Al-Qurtubi (Cortoba)
+### 1.3.12 d. 1286: Al-Baydawi (Shiraz-Tabriz)
+### 1.3.13 d. 1310: Shams al-Dīn al-Samarqandī (Samarqand)
+### 1.3.14 d. 1401: Ibn Arafa (Tunis)
+### 1.3.15 d. 1414: Fairuzabadi (Fars-Mekka)
+### 1.3.16 d. 1505: Al-Suyuti (Cairo)
+### 1.3.17 d. 1344: Abu Hayyan al-Gharnati (Spain-Cairo)
+### 1.3.18 d. 1373: Ibn Kathir (Bosra-Damascus)
+
+# 1.4 Conventional categorisation and inter-relationships of the authors
+
+# 2 Analysis
+
+# 2.1 Most frequent words (MFW), Zipf's law
+
+# 2.2 Stylometrics
+
+# 2.3 Topic Modelling results
+
+# 2.4 Congruences of observations with conventional views
+
+# 2.5 Notable differences to conventional views
+
+# 3 Conclusion
+
+# 3.1 Possible theses based on findings
+
+Ibn Tayymiyya was an important guy and we think we can actually prove this because the topics he writes about were present in Topic Modelling blah blah yadda yadda which is consisent with both MFW and Stylometric analyses blah blah it would be really great if something like this could be here but I really don't think so and nothing matters anyways since I'm kinda tired blah blah. In any case, all the Islamists must, after having read our awesome paper, surrender to the tenacity and ferociousness and whatnot of our findings and concede completely and immediately that, yes, without further theological considerations necessary, *ǧihād* must be the striving for peace and *islām* is the way towards universal love, and hopefully, universal income as well. At least I've succeeded in producing a block of text so that you can see what that looks like. Hipp hipp hooraaay!
+
+# 3.2 Discussion of necessary further work
+
+# 4 Bibliography
