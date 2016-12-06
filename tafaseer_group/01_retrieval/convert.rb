@@ -12,9 +12,9 @@ require 'active_record'
 require 'awesome_print'
 require 'pry'
 require 'nokogiri'
-require_relative 'lib/asciiarabic'
-require_relative 'lib/flat_hash'
-require_relative 'lib/numeric_to_hindi'
+require_relative '../lib/asciiarabic'
+require_relative '../lib/flat_hash'
+require_relative '../lib/numeric_to_hindi'
 
 ActiveRecord::Base.establish_connection(
   adapter: 'sqlite3',
@@ -23,15 +23,15 @@ ActiveRecord::Base.establish_connection(
 
 class CTSUnit < ActiveRecord::Base
   # CREATE TABLE units(
-  #   id          INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
-  #   cts_urn     CHAR(255) NOT NULL, 
-  #   text        TEXT, 
-  #   label       TEXT, 
-  #   title       CHAR(255), 
-  #   author_name CHAR(255), 
+  #   id          INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  #   cts_urn     CHAR(255) NOT NULL,
+  #   text        TEXT,
+  #   label       TEXT,
+  #   title       CHAR(255),
+  #   author_name CHAR(255),
   #   author_era  INTEGER
-  #   category_id INTEGER NOT NULL, 
-  #   author_id   INTEGER NOT NULL, 
+  #   category_id INTEGER NOT NULL,
+  #   author_id   INTEGER NOT NULL,
   #   sura_id     INTEGER NOT NULL,
   #   aaya_id     INTEGER NOT NULL
   # );
@@ -106,7 +106,7 @@ class AlTafsirYAMLFiles
   # able to use To Pan, etc.) the CSV files must comply with CITE CTS.
   # The specs are at
   # http://cite-architecture.github.io/ctsurn_spec/specification.html.
-  
+
   def cts_csv_writeline(madhab, tafseer, line_no, opts = {nospecialchars: false})
     # @hash contents example:
     #
