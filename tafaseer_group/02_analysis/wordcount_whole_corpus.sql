@@ -9,16 +9,16 @@ SELECT
   --
   -- QUR'AN PASSAGE:
   -- the way its usually given in literature
-  -- 
+  --
   (SUBSTR('000'||sura_id,-3,3) ||':'|| SUBSTR('000'||aaya_id,-3,3))
-    AS passage, 
+    AS passage,
   --
   -- AMOUNT OF WORDS SPENT ON EACH AAYA:
   -- we have to use a condition here to get a good value
   -- http://stackoverflow.com/questions/3293790/query-to-count-words-sqlite-3
   --
   (CASE WHEN LENGTH(`text`) >= 1
-        THEN 
+        THEN
           (LENGTH(`text`) - LENGTH(REPLACE(`text`, ' ', '')) + 1)
         ELSE
           (LENGTH(`text`) - LENGTH(REPLACE(`text`, ' ', '')))
@@ -41,13 +41,13 @@ SELECT
   -- the words_spent calculation here
   --
   ROUND(100 * ((CASE WHEN LENGTH(`text`) >= 1
-        THEN 
+        THEN
           (LENGTH(`text`) - LENGTH(REPLACE(`text`, ' ', '')) + 1)
         ELSE
           (LENGTH(`text`) - LENGTH(REPLACE(`text`, ' ', '')))
         END) * 1.0 / W.words * 1.0), 5)
     AS percentage
-FROM cts_units AS U 
-JOIN wordcounts_by_author AS W 
+FROM cts_units AS U
+JOIN wordcounts_by_author AS W
   ON U.author_name=W.author_name
-ORDER BY U.author_name, percentage, words_spent, passage ASC;
+ORDER BY U.author_name ASC, percentage DESC, words_spent DESC, passage ASC;
