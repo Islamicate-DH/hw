@@ -14,7 +14,7 @@ source("cleanR.R")
 
 
 ## First I set a time-sequence which I want to download. Here I chose 1 year.
-## The function generates 365 date for each day (or more if you chose a larger intervall).
+## The function generates 365 dates for each day (or more if you chose a larger intervall).
 days.to.scrape<-generateTimeSequence("2016/1/1","2016/10/31")
 hp.base<-"http://www.hespress.com/archive/"
 

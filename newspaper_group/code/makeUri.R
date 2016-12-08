@@ -58,8 +58,22 @@ for (i in 1:5) {
   )
 }
 
-#  corpus<-read.csv(file="/home/tobias/Dropbox/Dokumente/islamicate2.0/reduced/hespress.csv",fileEncoding = "UTF-8",sep=",",header = FALSE,stringsAsFactors=F)
+corpus<-read.csv(file="/home/tobias/Dropbox/Dokumente/islamicate2.0/reduced/thawra.csv",fileEncoding = "UTF-8",sep=",",header = FALSE,stringsAsFactors=F)
+corpus <- corpus[which(corpus$V2!=""),]
 
+
+words.per.article.l <- sapply(corpus$V2, strsplit, "[[:space:]]+")
+words.per.article.v <- sapply(words.per.article.l, unlist)
+i <- 1
+length.of.articles <- NULL
+for (article in words.per.article.v) {
+  length.of.articles[i] <- length(article)
+  i <- i+1  
+}
+mean(length.of.articles)
+
+# characters
+mean(nchar(corpus$V2))
   
 # 
 #   corpus$V2 <- gsub("[[:punct:]]", " ", corpus$V2)  # replace punctuation with space
@@ -222,10 +236,15 @@ for (i in 1:5) {
 # # runApp('/home/tobias/Downloads/ToPan-master/')
 # # options(shiny.maxRequestSize=30*1024^2)
 #  
-# 
-#   
-   
 
+ al.corpus <- read.csv("/home/tobias/Dropbox/Dokumente/islamicate2.0/reduced/almasralyoum.csv", sep="\t", header=FALSE,encoding = "UTF-8",quote="",stringsAsFactors=F)
+
+
+al.corpus[1,2]   
+al.corpus[grep(al.corpus[,1],pattern = "AY041478"),2]
+gsub(al.corpus[1,1],pattern = "^[A-Z]","")
+str_replace_all(al.corpus[1,1], "[^[:alnum:]]", " ")
+gsub("[[:punct:]]", " ", al.corpus[1,2]   )
 # #########################################################################################################
 # ###################################     TRANSLITERATION, STEMMING     ################################### 
 # #########################################################################################################

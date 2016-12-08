@@ -19,6 +19,7 @@ docs <- Corpus(DataframeSource(data.frame(data[,4])))
 ### hier les ich halt alles. punkte, nummers und whitespace werden aber trotzdem 
 ## entfernt, sodass das keinen unterschied machen sollte
 
+wordcloud(scale = c(4,0.3),rot.per = FALSE, random.order = FALSE, random.color = FALSE)
 
 #docs <- Corpus(DirSource(cname))   
 #docs<-data.corp
