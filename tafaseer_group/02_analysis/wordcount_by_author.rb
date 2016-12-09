@@ -5,7 +5,7 @@ require_relative Pathname('../lib/asciiarabic.rb')
 
 database = Pathname('../../corpora/altafsir_com/processed/corpus.sqlite3')
 query = Pathname('./wordcount_whole_corpus.sql')
-big_output_file = Pathname('./data_automated/wordcount_ratios_per_author_per_aaya.csv')
+big_output_file = Pathname('./data_automated/wordcounts/wordcount_ratios_per_author_per_aaya.csv')
 command = "/usr/bin/env sqlite3 -header -csv #{database} < #{query} > #{big_output_file}"
 
 puts "Running query..."
@@ -25,7 +25,7 @@ File.readlines(big_output_file).each_with_index do |line,i|
   end
 
   if i > 0
-    File.open(Pathname("./data_automated/wordcount_ratios_per_aaya_for_#{author}.csv"), 'a') do |file|
+    File.open(Pathname("./data_automated/wordcounts/wordcount_ratios_per_aaya_for_#{author}.csv"), 'a') do |file|
       if file.size == 0
         puts "writing file for #{author}"
         file.write header
