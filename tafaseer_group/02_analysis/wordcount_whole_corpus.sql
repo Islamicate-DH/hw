@@ -1,7 +1,14 @@
 ---
 --- Helper table needed for second query
+--- Get rid of it first if it already existed
 ---
+DROP TABLE IF EXISTS wordcounts_by_author;
 CREATE TABLE wordcounts_by_author(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, author_name CHAR(255) UNIQUE NOT NULL, words INTEGER NOT NULL);
+
+---
+--- Determine wordcounts for everything the author wrote
+--- Note this doesn't take into consideration duplicate pages!
+---
 SELECT
   author_name,
   SUM((CASE WHEN LENGTH(text) >= 1
@@ -26,7 +33,11 @@ FROM cts_units
 GROUP BY author_name
 ORDER BY words ASC;
 
+---
+--- Now determine wordcounts per page, if it's distinct from any other page
+--- 
 SELECT
+  text_hash,
   --
   -- CATEGORY AND AUTHOR:
   -- same format as we use everywhere else
