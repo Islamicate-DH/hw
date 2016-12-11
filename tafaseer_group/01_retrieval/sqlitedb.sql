@@ -1,0 +1,1 @@
+CREATE TABLE cts_units(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, cts_urn CHAR(255) NOT NULL, text TEXT, text_hash CHAR(255), label TEXT, title CHAR(255), author_name CHAR(255), author_era INTEGER, category_id INTEGER NOT NULL, author_id INTEGER NOT NULL, sura_id INTEGER NOT NULL, aaya_id INTEGER NOT NULL);
