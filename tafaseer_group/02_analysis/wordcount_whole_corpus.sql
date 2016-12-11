@@ -9,17 +9,6 @@ CREATE TABLE wordcounts_by_author(id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
 --- Determine wordcounts for everything the author wrote
 --- Note this doesn't take into consideration duplicate pages!
 ---
-SELECT
-  author_name,
-  SUM((CASE WHEN LENGTH(text) >= 1
-        THEN
-          (LENGTH(text) - LENGTH(REPLACE(text, ' ', '')) + 1)
-        ELSE
-          (LENGTH(text) - LENGTH(REPLACE(text, ' ', '')))
-        END)) AS words
-FROM cts_units
-GROUP BY author_name
-ORDER BY words ASC;
 INSERT INTO wordcounts_by_author (author_name, words)
 SELECT
   author_name,
