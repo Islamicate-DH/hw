@@ -5,16 +5,15 @@
 # File description:
 #     Ahram main file. For scraping use bash-script to use tmux.
 # 
-######################################################################################################
-#                                           NOTES
-######################################################################################################
-## some dependencies etc.
-##libssl-dev, libxml2-dev
+###################################################################
+#                         NOTES
+###################################################################
+## To run the following scripts correctly, some preconditions have
+# to be met.
+# apt-get install libssl-dev libxml2-dev ## in command line
 # install.packages('stringi', configure.args='--disable-cxx11')
 # sudo apt-get install libcurl4-openssl-dev
-# install.packages("rvest") # error fixed
-#install.packages("optparse")
-# install.packages("tidyr)
+
 
 rm(list=ls())
 

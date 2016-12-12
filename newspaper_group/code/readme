@@ -5,5 +5,6 @@ cleanR.R	functions used for transfering HTML to csv
 makeUri.R
 	create final csv files
 basic_functions
+	more general functions.
 
 the functions are being called from the files hespress.R etc.
