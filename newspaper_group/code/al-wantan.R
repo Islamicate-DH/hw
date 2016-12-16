@@ -1,13 +1,19 @@
-##                  
-##                            Al-Watan Scraper
-##
-##      
+# Copyright Tobias Wenzel
+# In Course: Islamicate World 2.0
+# University of Maryland, University Leipzig
+#
+# File description:
+#     Al-Watan main file.
 rm(list=ls())## clean the workspace
-setwd("~/Dokumente/islamicate2.0/project/al-watan") # setting working directory
 
-libs<-c("rvest","stringr","tidyr","methods","beepr")
-for(i in 1:length(libs)){
-  suppressPackageStartupMessages(library(libs[i], character.only = TRUE))
-}
+source("scrapeR.R")
+source("cleanR.R")
 
 
+urls<-scan(file="alwatan.links", what="character",sep = "\n")
+
+target.folder<- "~/Dokumente/hw/corpora/newspaper_archive/alwatan"
+sapply(urls,scrape.article.alwatan, target.folder)
+
+source.folder <- target.folder
+clean.alwatan(source.folder)
