@@ -1,54 +1,70 @@
 ---
-<<<<<<< HEAD
-title: An Exploratory Data Analysis of 18 Tafasīr From the Early 8th to the Late
-  14th Century and Across a Wide Geographical Area Using Corpus Linguistical Methods
-author: "F. Blunck, S. Bukhari, M. Foradi, T. D. Keppen, J. R. Schmid"
-output:
-=======
-title: An Exploratory Data Analysis of 18 Tafasīr From the Early 8th to the Late 14th
-  Century and Across a Wide Geographical Area Using Corpus Linguistical Methods
-author: "F. Blunck, S. Bukhari, M. Foradi, T. D. Keppen, J. R. Schmid"
-output:
-  html_document:
-    toc: yes
->>>>>>> 94d8e1af6ab5551afbd6c0c1909304e02c94731e
-  html_notebook:
-    toc: yes
-  pdf_document:
-    toc: yes
-<<<<<<< HEAD
-  pdf_document:
-    toc: yes
-=======
->>>>>>> 94d8e1af6ab5551afbd6c0c1909304e02c94731e
+title: Badʾu-l-masīri fī taʾrīḫi-t-tafsīri--An Exploratory Data Analysis of 17 Tafāsīr From the Early 8th to the Late 14th
+ Century and Across a Wide Geographical Area Using Corpus Linguistical Methods
+subtitle: Universities of Leipzig and Maryland
+author: 'Franziska Blunck, Sarosh Bukhari, Dr. Maryam Foradi, Thomas Davis Keppen, Jonathan Raphael Schmid, BA; supervising: Dr. Matthew Thomas Miller and Dr. Maxim Romanov'
+date: "`r format(Sys.time(), '%d %B %Y')`"
+tags: [tafsir, tafseer, tafasir, tafaseer, quran, exegesis, corpus linguistics, exploratory data analysis]
+abstract: Through web scraping, a large corpus of *tafsīr* (Quran exegetical work) was downloaded and initial exploratory data analysis was performed on it by identifying the number of words written by the different authors on each chunk or passage, as well as on each *sūra* (chapter of the Quran). Subsequently, with the help of network analysis, it was possible to draw first conclusions about the acquired data.
+output: pdf_document
+toc: no
+fontsize: 12pt
+geometry: margin=1.5in
+lang: en
+documentclass: article
+latex_engine: xelatex
+urlcolor: blue
 ---
 
-# 1 The corpus
+# 1 Introduction
+
+How has Islamic interpretation of the Quran changed over time? Have certain sections of the Quran enjoyed more attention from religious scholars and if so, has preference shifted with time? Does geographic distance equate to divergent preference for scholars who are contemporaneous to one another? Is doctrinal affiliation the primary factor in a *mufassir* (Islamic exegete) giving a section of the Quran more consideration? To answer these questions, we sought out exegetical works that were in a manageable and navigable digital format.
+
+# 2 The corpus
+
+As part of an effort to make Islamic scholarship more accessible, the Jordanian-based *Royal Aal al-Bayt Institute for Islamic Thought* commissioned the creation of [altafsir.com](altafsir.com), an online repository of classical works of *tafsīr*. The format of the website allows a user to select a specific *āya* (verse from the Quran) and see the relevant section of *tafsīr* that provides commentary on the *āya*. This structure, along with the fact that the texts are typed in and not photos of scanned pages, made the website ideal for our research which required that the texts be in a digital format and segmented according to the verse that is being commented on. The ultimate goal of [altafsir.com](altafsir.com) is to provide a diverse collection of texts that are derived from various traditions, sects, and schools of jurisprudence. That desired breadth has yet to be achieved. The website currently has seventeen complete tafāsīr that were all written by *sunnī* (one of the major two sects of Islam) scholars.
+
+# 3 Exploratory data analysis
+
+Our attempt at determining which verses enjoyed more consideration from the *mufassirūn* began with calculating the word count of every verse-specific chunk of the commentary and dividing that number by the total word count of the *tafsīr*. It was our belief that increased attention on a verse was indicative of some sort of importance to the *mufassir*. Importance might not necessarily mean that the *mufassir* had an increased affinity for the values or instructions espoused in the verse. A *mufassir* might have believed that an obscure verse required elucidation to make its message comprehensible to the Muslim layman and therefore devoted more writing to explication and contextualizing.
+
+When we sorted the verses from most written about to least, we observed some suspicious patterns. Consecutive verses were appearing next to one another on the list and they had identical word counts. When we inspected the files in our corpus, we found that there were duplicate chunks of text. The problem was that most of the writers alternated between writing about singles verses and writing about groups of consecutive verses that dealt with a single narrative or theme. If a section of a *tafsīr* covered consecutive verses together, [altafsir.com](altafsir.com) repeated that segment of text when each of those verses were selected on the website. When the script to download the tafāsīr was run, it downloaded the repeated segments of texts and organized them as if they were unique to a single verse. Only three of the writers in the corpus consistently wrote about single verses and therefore did not succumb to the duplicate text problem. Of the 87 *tafsīr* works listed on the website, 69 turned out to be completely empty and one author, *Ibn ʿArafa*, only provided commentary on *sūratān*. Both were removed from the corpus used for analysis, which consequently consists of 17 works comprising $i_{total}=16444304$ words.
+
+We ran a script that looked for duplicate texts and removed any repeated segments. Since we were not able to get word counts for specific verses, we decided to focus on the *sūra* or chapters of the Quran. There is a huge range of *sūra* lengths, with *sūrat al-baqara*, the longest, consisting of 286 verses and *sūrat al-kawṯar*, the shortest, consisting of 3 verses, so looking at how long the commentary was for a specific *sūra* relative to total *tafsīr* length would probably just leave us with something that resembles a list of *sūra*, from longest to shortest. We chose instead to look at length of *tafsīr* commentary divided by the length of the *sūra* it is commenting. We looked at the top twenty-five *suwar* for each *mufassir* and observed that the number of shared *sūra* among the writers of the corpus ranged from twelve to twenty-two. The relationship between the *mufassirūn* was visualized using [Gephi](https://gephi.org/), a free/open-source program used for social network analysis.
+
+## 3.1 The Groupings
+
+![Gephi social network analysis result](../02_analysis/data_manual/gephi/mufasirooncomparison.png)
+
+The data as described so far was run through the Gephi social network analysis program. The algorithm calculated four distinct groups, represented as colors in figure 1. They are as follows:
+
+1. *Ibnu-l-Ǧawzī*, *aṭ-Ṭabarī*, *Ibn Kaṯīr*, *Ibn ʿAṭīya*, and *al-Baġawī*
+2. *az-Zamaḫšarī*, *al-Bayḍāwī*, and *an-Nasafī*
+3. *ar-Rāzī*, *al-Fayrūzābādī*, *al-Qurṭubī*, *al-Ḫāzin*, and *Abū Ḥayyān*
+4. *al-Maḥallī* and *as-Suyūṭī*, *as-Samarqandī*, *al-Māwardī*, and *Ibn ʿAbdi-s-Salām*
+
+# 4 Bibliography
+
+Blah blah blah
+
+# Appendix
+
+TODO: disambiguate mufassir names wherever they end up appearing first. Here's the unclear ones (mails from Dec 15): "There is more than one al-Razi and Ibn atiyah.  Our al-Razi is Fakhr al-Din and our ibn atiya is ibn atiya al-andalusi. And al- khazin is Ala' al-din al-khazin."
+
+TODO: remove below draft headings before handing the paper in!
 
 ## 1.1 Data origin and possible intentions behind its compilation
-
 ## 1.2 Data extraction and transformation into processable outer form
-
-Yo, extraction was simple like tha' أخي:
-
-```{r}
-print(paste('Hello', 'world', '!'))
-```
-
 ## 1.3 Authors of the 18 works
-
-### 1.3.1  d. 728: Jarir ibn Atiyah (Yamamah, Damascus)
-
-Dude's our oldest homie, 'n he swag man! Like, dude's not only a *mufassir*, naw, he actually a real poet, too, 'n know how to do some satire, ain't that cool? ???????????? ???????? ???? ????????????????
-
-### 1.3.2  d. 925: Muhammad ibn Zakariya al-Razi (Rey)
-### 1.3.3  d. 923: Al-Tabari (Amol-Baghdad)
-### 1.3.4  d. 971: Abū Ja'far al-Khāzin (Iran?)
-### 1.3.5  d. 1044: Al-Baghawi (?)
-### 1.3.6  d. 1058: Al-Mawardi (Basrah-Baghdad)
-### 1.3.7  d. 1142: Abu Hafs Umar an-Nasafi (Nakhshab-Samarqand)
-### 1.3.8  d. 1144: Al-Zamakhshari (Kwharezm-Mecca-Khwarezm)
-### 1.3.9  d. 1201: Ibn al-Jawzi (Baghdad)
+### 1.3.1 d. 728: Jarir ibn Atiyah (Yamamah, Damascus)
+### 1.3.2 d. 925: Muhammad ibn Zakariya al-Razi (Rey)
+### 1.3.3 d. 923: Al-Tabari (Amol-Baghdad)
+### 1.3.4 d. 971: Abū Ja'far al-Khāzin (Iran?)
+### 1.3.5 d. 1044: Al-Baghawi (?)
+### 1.3.6 d. 1058: Al-Mawardi (Basrah-Baghdad)
+### 1.3.7 d. 1142: Abu Hafs Umar an-Nasafi (Nakhshab-Samarqand)
+### 1.3.8 d. 1144: Al-Zamakhshari (Kwharezm-Mecca-Khwarezm)
+### 1.3.9 d. 1201: Ibn al-Jawzi (Baghdad)
 ### 1.3.10 d. 1261: Ibn 'Abd as-Salam (Damascus-Egypt)
 ### 1.3.11 d. 1273: Al-Qurtubi (Cortoba)
 ### 1.3.12 d. 1286: Al-Baydawi (Shiraz-Tabriz)
@@ -58,27 +74,13 @@ Dude's our oldest homie, 'n he swag man! Like, dude's not only a *mufassir*, naw
 ### 1.3.16 d. 1505: Al-Suyuti (Cairo)
 ### 1.3.17 d. 1344: Abu Hayyan al-Gharnati (Spain-Cairo)
 ### 1.3.18 d. 1373: Ibn Kathir (Bosra-Damascus)
-
 # 1.4 Conventional categorisation and inter-relationships of the authors
-
 # 2 Analysis
-
 # 2.1 Most frequent words (MFW), Zipf's law
-
 # 2.2 Stylometrics
-
 # 2.3 Topic Modelling results
-
 # 2.4 Congruences of observations with conventional views
-
 # 2.5 Notable differences to conventional views
-
 # 3 Conclusion
-
 # 3.1 Possible theses based on findings
-
-Ibn Tayymiyya was an important guy and we think we can actually prove this because the topics he writes about were present in Topic Modelling blah blah yadda yadda which is consisent with both MFW and Stylometric analyses blah blah it would be really great if something like this could be here but I really don't think so and nothing matters anyways since I'm kinda tired blah blah. In any case, all the Islamists must, after having read our awesome paper, surrender to the tenacity and ferociousness and whatnot of our findings and concede completely and immediately that, yes, without further theological considerations necessary, *ǧihād* must be the striving for peace and *islām* is the way towards universal love, and hopefully, universal income as well. At least I've succeeded in producing a block of text so that you can see what that looks like. Hipp hipp hooraaay!
-
 # 3.2 Discussion of necessary further work
-
-# 4 Bibliography

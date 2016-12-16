@@ -8,7 +8,7 @@ for (lib in c('rvest', 'stringr', 'jsonlite', 'yaml', 'httr', 'optparse', 'strin
 }
 
 # Home-made libraries for the win!
-source(file.path('lib', 'grepx.r'))
+source(file.path('..', 'lib', 'grepx.r'))
 
 paths = list()
 paths$downloaded <- file.path('..', '..', 'corpora', 'altafsir_com', 'downloaded')
@@ -29,11 +29,11 @@ read_dirs <- function(paths, force=FALSE)
           message(path)
           paths$infile <- path
           data = list() # Whither to put our treasure, arrr!
-          regx = 'quran_(?<sura>\\d{3})/aaya_(?<aaya>\\d{3})/madhab_(?<madhab>\\d{2})/tafsir_(?<tafsir>\\d{2})' 
-          data$position = grepx(regx, path)[[1]] # See lib/grepx.R! # Attn: characters, not integers returned!
+          regx = 'quran_(?<sura>\\d{3})/aaya_(?<aaya>\\d{3})/madhab_(?<madhab>\\d{2})/tafsir_(?<tafsir>\\d{2})'
+          data$position = grepx(regx, path)[[1]] # See ../lib/grepx.r! # Attn: characters, not integers returned!
           display_status_message(t0, data$position)
           # Go through page files
-          paths$outpath = file.path(paths$extracted, 
+          paths$outpath = file.path(paths$extracted,
             sprintf('quran_%s',  data$position$sura  ),
             sprintf('aaya_%s',   data$position$aaya  ),
             sprintf('madhab_%s', data$position$madhab))
@@ -67,7 +67,7 @@ read_files <- function(paths, data)
       #   Download the ayah given by directory numbers via GQ API
       data$aaya = gq_get_aaya(
         paths$quran,
-        as.numeric(data$position$sura), 
+        as.numeric(data$position$sura),
         as.numeric(data$position$aaya)
       )
       # Go through subsequent result blocks
@@ -103,8 +103,8 @@ write_file <- function(paths, data)
 display_status_message <- function(t0, position) {
   delim = rep('–', 115)
   message(
-    c("\033[2J","\033[0;0H"), 
-    delim, '\n Working…\n', 
+    c("\033[2J","\033[0;0H"),
+    delim, '\n Working…\n',
     delim,
     sprintf('\nSura:\t%s | ',  position$sura),
     sprintf('Ayah:\t%s | ',    position$aaya),
@@ -112,7 +112,7 @@ display_status_message <- function(t0, position) {
     sprintf('Tafsir:\t%s | ',  position$tafsir),
     sprintf('Time elapsed:\t%.0f min\n', (proc.time() - t0)[3] / 60),
     delim
-  ) 
+  )
 }
 
 extract_text <- function(raw_html)

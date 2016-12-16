@@ -12,26 +12,27 @@ require 'active_record'
 require 'awesome_print'
 require 'pry'
 require 'nokogiri'
-require_relative 'lib/asciiarabic'
-require_relative 'lib/flat_hash'
-require_relative 'lib/numeric_to_hindi'
+require 'digest/md5'
+require_relative '../lib/asciiarabic'
+require_relative '../lib/flat_hash'
+require_relative '../lib/numeric_to_hindi'
 
 ActiveRecord::Base.establish_connection(
   adapter: 'sqlite3',
-  database: '../../corpora/altafsir_com/processed/corpus3.sqlite3'
+  database: '../../corpora/altafsir_com/processed/corpus.sqlite3'
 )
 
 class CTSUnit < ActiveRecord::Base
   # CREATE TABLE units(
-  #   id          INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
-  #   cts_urn     CHAR(255) NOT NULL, 
-  #   text        TEXT, 
-  #   label       TEXT, 
-  #   title       CHAR(255), 
-  #   author_name CHAR(255), 
+  #   id          INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+  #   cts_urn     CHAR(255) NOT NULL,
+  #   text        TEXT,
+  #   label       TEXT,
+  #   title       CHAR(255),
+  #   author_name CHAR(255),
   #   author_era  INTEGER
-  #   category_id INTEGER NOT NULL, 
-  #   author_id   INTEGER NOT NULL, 
+  #   category_id INTEGER NOT NULL,
+  #   author_id   INTEGER NOT NULL,
   #   sura_id     INTEGER NOT NULL,
   #   aaya_id     INTEGER NOT NULL
   # );
@@ -106,7 +107,7 @@ class AlTafsirYAMLFiles
   # able to use To Pan, etc.) the CSV files must comply with CITE CTS.
   # The specs are at
   # http://cite-architecture.github.io/ctsurn_spec/specification.html.
-  
+
   def cts_csv_writeline(madhab, tafseer, line_no, opts = {nospecialchars: false})
     # @hash contents example:
     #
@@ -146,10 +147,12 @@ class AlTafsirYAMLFiles
     current_txt = Pathname("../../corpora/altafsir_com/processed/plain/complete/%03d-%03d.txt" % [madhab, tafseer])
     return unless File.exist? current_txt
     begin
+      text = remove_specialchars(@hash['text'])
       if _urn = urn(line_no)
         CTSUnit.create(
           cts_urn:     _urn,
-          text: remove_specialchars(@hash['text']),
+          text:        text,
+          text_hash:   Digest::MD5.hexdigest(text),
           label:       @hash['aaya'],
           title:       @hash['meta_title'],
           author_name: @hash['meta_author'],

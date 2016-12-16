@@ -16,7 +16,7 @@ number_of_madahib = 10
 number_of_suwar  = 114
 # Dropdown boxes 2 and 4,
 # thank you Christoph!
-number_of_tafaseer_per_madhab = c(8, 20, 10, 2, 7, 7, 4, 3, 5, 2) 
+number_of_tafaseer_per_madhab = c(8, 20, 10, 2, 7, 7, 4, 3, 5, 2)
 number_of_aayaat_per_sura     = c(7, 286, 200, 176, 120, 165, 206, 75, 129, 109, 123, 111, 43, 52, 99, 128, 111, 110, 98, 135, 112, 78, 118, 64, 77, 227, 93, 88, 69, 60, 34, 30, 73, 54, 45, 83, 182, 88, 75, 85, 54, 53, 89, 59, 37, 35, 38, 29, 18, 45, 60, 49, 62, 55, 78, 96, 29, 22, 24, 13, 14, 11, 11, 18, 12, 12, 30, 52, 52, 44, 28, 28, 20, 56, 40, 31, 50, 40, 46, 42, 29, 19, 36, 25, 22, 17, 19, 26, 30, 20, 15, 21, 11, 8, 8, 19, 5, 8, 8, 11, 11, 8, 3, 9, 5, 4, 7, 3, 6, 3, 5, 4, 5, 6)
 
 download_all <- function(url, path, start_pos=c(1,1,1,1), stop_pos=c(0,0,0,0))
@@ -25,7 +25,7 @@ download_all <- function(url, path, start_pos=c(1,1,1,1), stop_pos=c(0,0,0,0))
   t0 = proc.time()
   # The mother of all nested loops. Makes Ross' and Robert's hearts cringe,
   # but works. It would be more R-ish to use expand.grid on the `parameters'
-  # data grid, unfortunately urltools does not seem to provide the necessary 
+  # data grid, unfortunately urltools does not seem to provide the necessary
   # functions to do so.
   # ~~~
   # Major thanks to Franziska for all the sweets that made this possible!
@@ -46,14 +46,14 @@ download_all <- function(url, path, start_pos=c(1,1,1,1), stop_pos=c(0,0,0,0))
             sprintf('Sura:\t%s/%s | ',       sura,   number_of_suwar),
             sprintf('Aaya:\t%s/%s | ',       aaya,   number_of_aayaat_per_sura[sura]),
             sprintf('Time elapsed:\t%.0f min\n', (proc.time() - t0)[3] / 60),
-            delim, '\n', url)          
+            delim, '\n', url)
           download(url, path, sura, aaya, madhab, tafsir)
           # If this happens, we've hit the point where we're supposed to stop.
           if (identical(c(madhab,tafsir,sura,aaya), stop_pos)) {stop_execution()}
           sleep(0.1) # Sleep a little so we're not seen as a threat.
         }
-      } 
-    } 
+      }
+    }
   }
 }
 
@@ -61,8 +61,8 @@ download_all <- function(url, path, start_pos=c(1,1,1,1), stop_pos=c(0,0,0,0))
 # I completely agree with the name of this function in any circumstance!
 stop_execution <- function()
 {
-  cat("Reached end of requested range, stopping.")	
-	pid = Sys.getpid() 
+  cat("Reached end of requested range, stopping.")
+	pid = Sys.getpid()
 	pskill(pid, SIGINT)
 	Sys.sleep(1)
 }
@@ -82,8 +82,8 @@ download <- function(url, root, sura, aaya, madhab, tafsir)
   url = param_set(url, 'tSoraNo',   sura)
   url = param_set(url, 'tTafsirNo', tafsir)
   url = param_set(url, 'tAyahNo',   aaya)
-  # This is where we start 
-  page = 1     
+  # This is where we start
+  page = 1
   no_pages = 1 # Might not be true, but we're assuming it for now
   # Will succeed at least once
   while (page <= no_pages) {
@@ -136,7 +136,7 @@ extract_number_of_pages <- function(raw_html)
 # Figure stuff out...
 option_list = list(
   make_option(
-    c('-b', '--start'), 
+    c('-b', '--start'),
     action='store', default=NA, type='character',
     help='Where to start downloading: madhab,tafsir,sura,aaya'),
   make_option(
