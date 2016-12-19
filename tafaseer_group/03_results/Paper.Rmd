@@ -20,27 +20,31 @@ urlcolor: blue
 
 How has Islamic interpretation of the Quran changed over time? Have certain sections of the Quran enjoyed more attention from religious scholars and if so, has preference shifted with time? Does geographic distance equate to divergent preference for scholars who are contemporaneous to one another? Is doctrinal affiliation the primary factor in a *mufassir* (Islamic exegete) giving a section of the Quran more consideration? To answer these questions, we sought out exegetical works that were in a manageable and navigable digital format.
 
-# 2 The Tafasir
+# 2 The Tafāsīr
 
 TODO: DMGize
 
-al-Bahr al-Muhit by Abu Hayyan
-al-Jami' li Ahkam al-Qur'an by al-Qurtubi
-al-Kashshaaf by al-Zamakhshari 
-al-Muharrar al-Wajiz fi Tafsir al-Kitaab al-'Aziz by Ibn Atiyyah
-Al-Nukat wal 'Uyuun by al-Mawardi
-Anwar al-Tanzil wa Asrar al-Ta’wil by al-Baydawi
-Bahr al-Uluum by al-Samarqandi
-Jami` al-bayan `an Ta'wil 'ay al-Qur'an by al-Tabari
-Lubab al-Ta'wil fi Ma'ani al-Tanzil by al-Khazin
-Ma’alm al-Tanzil by al-Baghawi
-Madarik al-Tanzil wa Haqa'iq al-Ta'wil by al-Nasafi
-Mafatih al-Ghayb by al-Razi
-Tafsir al-Jalalayn by al-Mahali and al-Suyuti
-Tafsir al-Qur'an by al-Fairuzabadi
-Tafsir al-Qur’an by Ibn Abd-al-Salam
-Tafsir al-Qur'an al-Azim by Ibn Kathir
-Zad al-Masir fi 'ilm al-Tafsir by Ibn al-Jawzi
+For reference, the following tafāsīr which ended up being the subject of this document are listed below. Short remarks on each of their authors' biographies will follow.
+
+TODO: If anybody feels like properly capitalizing the titles again, I don't, rigt now. The uppercase letters can be looked up (and then copied and pasted) by clicking on the lowercase letters on https://en.wikipedia.org/wiki/DIN_31635. You could also try https://github.com/sixtyfive/de_dmg/blob/master/windows7810/de_dmg_amd64.msi if you have Windows, but it's quite old and I don't know if it'll still work (but it might).
+
+* *al-baḥr al-muḥīt* by *Abū Ḥayyān*
+* *al-ǧāmiʿ li-ʾaḥkām al-qurʾān* by *al-Qurṭubī*
+* *al-kaššāf* by *az-Zamaḫšarī*
+* *al-muḥarrar al-waǧīz fī tafsīr al-kitāb al-ʾazīz* by *Ibn ʿAṭīya*
+* *an-nukat wa-l-ʿuyūn* by *al-Māwardī*
+* *anwār at-tanzīl wa-ʾasrār at-taʾwīl* by *al-Bayḍāwī*
+* *baḥr al-ʿulūm* by *as-Samarqandī*
+* *ǧāmiʿ al-bayān fī tafsīr al-Qurʾān* by *aṭ-Ṭabarī*
+* *lubāb at-taʾwīl fī maʿānī at-tanzīl* by *al-Ḫāzin*
+* *maʿlam at-tanzīl* by *al-Baġawī*
+* *madārik at-tanzīl wa-ḥaqa'iq at-taʾwīl* by *an-Nasafī*
+* *mafātīḥ al-ġayb* by *ar-Rāzī*
+* *tafsīr al-ǧalālayn* by *al-Maḥallī* and *as-Suyūṭī*
+* *tafsīr al-qurʾān* by *al-Fayrūzābādī*
+* *tafsīr al-qurʾān* by *Ibn ʿAbdi-s-Salām*
+* *tafsīr al-qurʾān al-karīm* by *Ibn Kaṯīr*
+* *zād al-masīr fī ʿilm at-tafsīr* by *Ibnu-l-Ǧawzī*
 
 # 2 The corpus
 
