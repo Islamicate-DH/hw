@@ -16,6 +16,8 @@ latex_engine: xelatex
 urlcolor: blue
 bibliography: Paper.bib
 csl: aethiopistische-forschungen.csl
+header-includes:
+  - \setlength\parindent{24pt}\setlength{\parskip}{0.0pt plus 1.0pt}
 ---
 
 # 1 Introduction
