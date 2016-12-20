@@ -7,7 +7,7 @@ date: "`r format(Sys.time(), '%d %B %Y')`"
 tags: [tafsir, tafseer, tafasir, tafaseer, quran, exegesis, corpus linguistics, exploratory data analysis]
 abstract: Through web scraping, a large corpus of *tafsīr* (Quran exegetical work) was downloaded and initial exploratory data analysis was performed on it by identifying the number of words written by the different authors on each chunk or passage, as well as on each *sūra* (chapter of the Quran). Through network analysis, it was possible to draw first conclusions about the acquired data.
 toc: no
-fontsize: 11pt
+fontsize: 12pt
 lang: en
 documentclass: article
 geometry: margin=1.25in
