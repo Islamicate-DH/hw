@@ -1,4 +1,22 @@
 #!/usr/bin/env Rscript
 
 library(rmarkdown)
-rmarkdown::render('Paper.Rmd', pdf_document(latex_engine='lualatex'))
+
+rmarkdown::render('appendix.rmd', pdf_document(
+  latex_engine='lualatex',
+  template=NULL,
+  keep_tex=TRUE
+))
+
+unlink('appendix.pdf')
+
+rmarkdown::render('paper.rmd', pdf_document(
+  latex_engine='lualatex',
+  includes = includes(
+    in_header='in_header.sty',
+    before_body='before_body.sty',
+    after_body='appendix.tex'
+  ),
+))
+
+unlink('appendix.tex')

@@ -1,0 +1,36 @@
+# Appendix
+
+```{r, echo=FALSE}
+library(knitr)
+opts_chunk$set(tidy.opts = list(width.cutoff=60, indent=2), tidy=TRUE)
+```
+
+## I Script [`01_retrieval/download.r`](https://github.com/Islamicate-DH/hw/tree/master/tafaseer_group/01_retrieval/download.r)
+
+```{r, code=readLines('../01_retrieval/download.r'), eval=FALSE}
+```
+
+## II Script [`01_retrieval/extract.r`](https://github.com/Islamicate-DH/hw/tree/master/tafaseer_group/01_retrieval/extract.r)
+
+```{r, code=readLines('../01_retrieval/extract.r'), eval=FALSE}
+```
+
+## III Script [`01_retrieval/process.rb`](https://github.com/Islamicate-DH/hw/tree/master/tafaseer_group/01_retrieval/process.rb)
+
+```{ruby, code=readLines('../01_retrieval/process.rb'), eval=FALSE}
+```
+
+## IV Script [`01_retrieval/convert.rb`](https://github.com/Islamicate-DH/hw/tree/master/tafaseer_group/01_retrieval/convert.rb)
+
+```{ruby, code=readLines('../01_retrieval/convert.rb'), eval=FALSE}
+```
+
+## V Script [`02_analysis/wordcount_by_author.rb`](https://github.com/Islamicate-DH/hw/tree/master/tafaseer_group/02_analysis/wordcount_by_author.rb)
+
+```{ruby, code=readLines('../02_analysis/wordcount_by_author.rb'), eval=FALSE}
+```
+
+## VI Query [`02_analysis/wordcount_whole_corpus.sql`](https://github.com/Islamicate-DH/hw/tree/master/tafaseer_group/02_analysis/wordcount_whole_corpus.sql)
+
+```{sql, code=readLines('../02_analysis/wordcount_whole_corpus.sql'), eval=FALSE}
+```

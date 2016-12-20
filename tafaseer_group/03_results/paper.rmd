@@ -5,20 +5,18 @@ subtitle: Universities of Leipzig and Maryland
 author: 'Franziska Blunck, Sarosh Bukhari, Dr. Maryam Foradi, Thomas Davis Keppen, Jonathan Raphael Schmid, BA; supervising: Dr. Matthew Thomas Miller and Dr. Maxim Romanov'
 date: "`r format(Sys.time(), '%d %B %Y')`"
 tags: [tafsir, tafseer, tafasir, tafaseer, quran, exegesis, corpus linguistics, exploratory data analysis]
-abstract: Through web scraping, a large corpus of *tafsīr* (Quran exegetical work) was downloaded and initial exploratory data analysis was performed on it by identifying the number of words written by the different authors on each chunk or passage, as well as on each *sūra* (chapter of the Quran). Subsequently, with the help of network analysis, it was possible to draw first conclusions about the acquired data.
-output: pdf_document
+abstract: Through web scraping, a large corpus of *tafsīr* (Quran exegetical work) was downloaded and initial exploratory data analysis was performed on it by identifying the number of words written by the different authors on each chunk or passage, as well as on each *sūra* (chapter of the Quran). Through network analysis, it was possible to draw first conclusions about the acquired data.
 toc: no
-fontsize: 12pt
-geometry: margin=1.5in
+fontsize: 11pt
 lang: en
 documentclass: article
-latex_engine: xelatex
+geometry: margin=1.25in
 urlcolor: blue
-bibliography: Paper.bib
+bibliography: paper.bib
 csl: aethiopistische-forschungen.csl
-header-includes:
-  - \setlength\parindent{24pt}\setlength{\parskip}{0.0pt plus 1.0pt}
 ---
+
+***
 
 # 1 Introduction
 
@@ -26,15 +24,27 @@ How has Islamic interpretation of the Quran changed over time? Have certain sect
 
 ## 1.1 A note on transliteration
 
-The transliteration system used is that of the [German Oriental Society](http://www.dmg-web.de/)[^dmg]. We have tried to be consistent in our transliteration of Arabic words (and sometimes Persian names), but for reasons stylistic reasons or other case-by-case considerations there can be slight inconsistencies for which we ask the reader's digression (i.e., vowelisation was sometimes added where it helps the flow of pronounciation). With regards to diphtong phonemes we have opted towards the variant employing the combination of one consonantal and one vowel representation which we feel best evokes a "closer-to-correct" pronounciation in readers not trained in Arabic. Proper names were translterated starting with capital letters only at the beginning of a sentence or if they are a person's or a place's name. Words that have found their way into English[^englishwords], and which the reader can be assumed to be familiar with, were only transliterated if part of a group of other Arabic words.
+The transliteration system used is that of the German Oriental Society[^dmg_url]. We have tried to be consistent in our transliteration of Arabic words (and sometimes Persian names); for the inconsistencies that remain (i.e., vowelisation was sometimes added where it helps the flow of pronounciation) we ask the reader's digression. With regards to diphtong phonemes we have opted towards the variant employing the combination of one consonantal and one vowel representation which we feel best evokes a "closer-to-correct" pronounciation in readers not trained in Arabic. Proper names were translterated starting with capital letters only at the beginning of a sentence or if they are a person's or a place's name. Words that have found their way into English[^englishwords], and which the reader can be assumed to be familiar with, were only transliterated if part of a group of other Arabic words.
+
+[^dmg_url]: [http://www.dmg-web.de/](http://www.dmg-web.de/)
 
 [^dmg]: *Deutsche Morgenländische Gesellschaft* in the original. A copy of the latest transliteration rules anno 1969 is available from [http://www.dmg-web.de/pdf/Denkschrift.pdf](http://www.dmg-web.de/pdf/Denkschrift.pdf).
 
 [^englishwords]: Such as Quran, Sunni, Shia, Fatimid, etc.
 
-# 2 The tafāsīr
+## 1.2 A technical note regarding this document
 
-For reference, the following *tafāsīr* which ended up being the subject of this document are listed below. Short remarks on each of their authors' biographies will follow.
+The present document was prepared using the `rmarkdown` package and consequently `knitr`'s built-in devices are being used to include the source code relevant to this study in the appendix. Unfortunately, the underlying libraries have not yet evolved to a point where they knows how to properly break-around longer lines as they often appear in source code files. The reader is kindly asked to open the source code files directly from the GitHub repository where they are being kept[^github] if she wishes to read them in detail. Towards that end, the appendix subheadings provide direct links to the respective files displayed beneath them.
+
+[^github]: [https://github.com/Islamicate-DH/hw/tree/master/tafaseer_group](https://github.com/Islamicate-DH/hw/tree/master/tafaseer_group)
+
+# 2 The corpus
+
+As part of an effort to make Islamic scholarship more accessible, the Jordanian-based *Royal Aal al-Bayt Institute for Islamic Thought* commissioned the creation of [altafsir.com](altafsir.com), an online repository of classical works of *tafsīr*. The format of the website allows a user to select a specific *āya* (verse from the Quran) and see the relevant section of *tafsīr* that provides commentary on the *āya*. This structure, along with the fact that the texts are typed in and not photos of scanned pages, made the website ideal for our research which required that the texts be in a digital format and segmented according to the verse that is being commented on. The ultimate goal of [altafsir.com](altafsir.com) is to provide a diverse collection of texts originating from various traditions, sects, and schools of jurisprudence. That desired breadth has yet to be achieved. The website currently has seventeen complete tafāsīr that were all written by *sunnī* (one of the major two sects of Islam) scholars.
+
+## 2.1 The tafāsīr
+
+The following *tafāsīr* which ended up being the subject of this document are listed below. Short remarks on each of their authors' biographies will follow.
 
 * *al-baḥr al-muḥīt* by *Abū Ḥayyān*
 * *al-ǧāmiʿ li-ʾaḥkām al-qurʾān* by *al-Qurṭubī*
@@ -54,23 +64,28 @@ For reference, the following *tafāsīr* which ended up being the subject of thi
 * *tafsīr al-qurʾān al-karīm* by *Ibn Kaṯīr*
 * *zād al-masīr fī ʿilm at-tafsīr* by *Ibnu-l-Ǧawzī*
 
-# 2 The corpus
-
-As part of an effort to make Islamic scholarship more accessible, the Jordanian-based *Royal Aal al-Bayt Institute for Islamic Thought* commissioned the creation of [altafsir.com](altafsir.com), an online repository of classical works of *tafsīr*. The format of the website allows a user to select a specific *āya* (verse from the Quran) and see the relevant section of *tafsīr* that provides commentary on the *āya*. This structure, along with the fact that the texts are typed in and not photos of scanned pages, made the website ideal for our research which required that the texts be in a digital format and segmented according to the verse that is being commented on. The ultimate goal of [altafsir.com](altafsir.com) is to provide a diverse collection of texts originating from various traditions, sects, and schools of jurisprudence. That desired breadth has yet to be achieved. The website currently has seventeen complete tafāsīr that were all written by *sunnī* (one of the major two sects of Islam) scholars.
-
 # 3 Methodology
 
 Our attempt at determining which verses enjoyed more consideration from the *mufassirūn* began with calculating the word count of every section of the tafsir that was commenting on a specific verse and dividing that number by the total word count of the *tafsīr*. It was our belief that increased attention on a verse was indicative of some sort of importance to the *mufassir*. Importance might not necessarily mean that the *mufassir* had an increased affinity for the values or instructions espoused in the verse. A *mufassir* might have believed that an obscure verse required elucidation to make its message comprehensible to the Muslim layman and therefore devoted more writing to explication and contextualizing.
 
 When we sorted the verses from most written about to least, we observed some suspicious patterns. Consecutive verses were appearing next to one another on the list and they had identical word counts. When we inspected the files in our corpus, we found that there were duplicate chunks of text. The problem was that most of the writers alternated between writing about singles verses and writing about groups of consecutive verses that dealt with a single narrative or theme. If a section of a *tafsīr* covered consecutive verses together, [altafsir.com](altafsir.com) repeated that segment of text when each of those verses were selected on the website. When the script to download the tafāsīr was run, it downloaded the repeated segments of texts and organized them as if they were unique to a single verse. Only three of the writers in the corpus consistently wrote about single verses and therefore did not succumb to the duplicate text problem. Of the 87 *tafsīr* works listed on the website, 69 turned out to be completely empty and one author, *Ibn ʿArafa*, only provided commentary on *sūratān*. Both were removed from the corpus used for analysis, which consequently consists of 17 works comprising $i_{total}=16444304$ words.
 
-We ran a script that looked for duplicate texts and removed any repeated segments. Since we were not able to get word counts for specific verses, we decided to focus on the *sūra* or chapters of the Quran. There is a huge range of *sūra* lengths, with *sūrat al-baqara*, the longest, consisting of 286 verses and *sūrat al-kawṯar*, the shortest, consisting of 3 verses, so looking at how long the commentary was for a specific *sūra* relative to total *tafsīr* length would probably just leave us with something that resembles a list of *sūra*, from longest to shortest. We chose instead to look at length of *tafsīr* commentary divided by the length of the *sūra* it is commenting. We looked at the top twenty-five *suwar* for each *mufassir* and observed that the number of shared *sūra* among the writers of the corpus ranged from twelve to twenty-two. The relationship between the *mufassirūn* was visualized using [Gephi](https://gephi.org/), a free/open-source program used for social network analysis.
+After trying a number of different data formats for working with the corpus, we settled on importing it into relational database table which allowed us to perform queries either detailled or broad on it without necessarily having to write any logic. To give an example, the following SQL query would return *az-Zamaḫšarī*'s commentary on the fourth verse of the famous *sūrat al-iḫlāṣ* together with a simple character count:
 
-## 3.1 The Results
+\singlespacing
+```{r, code=readLines('decoy.sql'), eval=FALSE}
+```
+\doublespacing
+
+We built a chain of queries first excluding duplicate texts and then any repeated segments. Appendix VI shows the full chain of queries which led to the CSV file that we then imported into a spreadsheet program to continue manually preparing it for network analysis. Because of the way most of the authors structure their commentary on the Quran, we were not able to get word counts for single verses, and so decided to focus on the *suwar* or chapters of the Quran. There is a huge range of *sūra* lengths, with *sūrat al-baqara*, the longest, consisting of 286 verses and *sūrat al-kawṯar*, the shortest, consisting of 3 verses, so looking at how long the commentary was for a specific *sūra* relative to total *tafsīr* length would probably just leave us with something that resembles a list of *sūra*, from longest to shortest. We chose instead to look at length of *tafsīr* commentary divided by the length of the *sūra* it is commenting. We looked at the top twenty-five *suwar* for each *mufassir* and observed that the number of shared *sūra* among the writers of the corpus ranged from twelve to twenty-two. The relationship between the *mufassirūn* was visualized using Gephi[^gephi], a free/open-source program used for social network analysis.
+
+[^gephi]: [https://gephi.org/](https://gephi.org/)
+
+## 3.1 The results
 
 ![Gephi social network analysis result](../02_analysis/data_manual/gephi/mufasirooncomparison.png)
 
-The data as described so far was run through the Gephi social network analysis program. The algorithm calculated four distinct groups, represented as colors in figure 1. They are as follows:
+Gephi's algorithm calculated four distinct groups, represented as colors in figure 1. They are as follows:
 
 1. Green: *Ibnu-l-Ǧawzī* (d. 597 AH), *aṭ-Ṭabarī* (d. 310 AH), *Ibn Kaṯīr* (d. 774 AH), *Ibn ʿAṭīya* (d. 546 AH), and *al-Baġawī* (d. 516 AH)
 2. Blue: *az-Zamaḫšarī* (d. 538 AH), *al-Bayḍāwī* (d. 685 AH), and *an-Nasafī* (d. 710 AH)
@@ -109,69 +124,6 @@ TODO: DMGize, mark citations
 
 From the results of the study, we cannot definitively state that focusing on certain aspects of the Quran is determined principally by any of the factors mentioned at the beginning of the paper (chronology, geography, dogma). However, we believe that examination of surah and ayah preference from Quranic exegetes deserves further exploration.
 
-# Appendix
-
-Note on source code formatting: as this document was prepared using the `rmarkdown` package, consequently `knitr`'s built-in devices are being used to include our source code in the below appendices for reference. Unfortunately, it has not yet evolved to a point where it knows how to properly break-around longer lines as they often appear in source code files. The reader is kindly asked to open the source code files directly from [the GitHub repository where they are being kept](https://github.com/Islamicate-DH/hw/tree/master/tafaseer_group) if they wish to read them in detail. Towards that end, the appendix subheadings provide direct links to the files.
-
-Note on placement of appendix and references: another limitation of using Rmarkdown for scientific documents is the placement of references at the end of the document and nowhere else. This can only be worked around by use of a modified template file as described in [the Rmarkdown documentation's comment section](http://rmarkdown.rstudio.com/authoring_bibliographies_and_citations.html). Unfortunately, time constraints didn't allow creation of such a template for this document.
-
-```{r, echo=FALSE}
-library(knitr)
-opts_chunk$set(tidy.opts = list(width.cutoff=60, indent=2), tidy=TRUE)
-```
-
-## I Script [`01_retrieval/download.r`](https://github.com/Islamicate-DH/hw/tree/master/tafaseer_group/01_retrieval/download.r)
-
-```{r, code=readLines('../01_retrieval/download.r'), eval=FALSE}
-```
-
-## II Script [`01_retrieval/extract.r`](https://github.com/Islamicate-DH/hw/tree/master/tafaseer_group/01_retrieval/extract.r)
-
-```{r, code=readLines('../01_retrieval/extract.r'), eval=FALSE}
-```
-
-## III Script [`01_retrieval/process.rb`](https://github.com/Islamicate-DH/hw/tree/master/tafaseer_group/01_retrieval/process.rb)
-
-```{ruby, code=readLines('../01_retrieval/process.rb'), eval=FALSE}
-```
-
-## IV Script [`01_retrieval/convert.rb`](https://github.com/Islamicate-DH/hw/tree/master/tafaseer_group/01_retrieval/convert.rb)
-
-```{ruby, code=readLines('../01_retrieval/convert.rb'), eval=FALSE}
-```
-
-## V Script [`02_analysis/wordcount_by_author.rb`](https://github.com/Islamicate-DH/hw/tree/master/tafaseer_group/02_analysis/wordcount_by_author.rb)
-
-```{ruby, code=readLines('../02_analysis/wordcount_by_author.rb'), eval=FALSE}
-```
-
-## VI Query [`02_analysis/wordcount_whole_corpus.sql`](https://github.com/Islamicate-DH/hw/tree/master/tafaseer_group/02_analysis/wordcount_whole_corpus.sql)
-
-```{sql, code=readLines('../02_analysis/wordcount_whole_corpus.sql'), eval=FALSE}
-```
 # 4 References
 
-TODO: Keep moving them into Biblatex file, keep referencing properly in the text.
-
-"Al-Suyuti." Encyclopedia Britannica Online. May 16, 2007. Accessed December 1, 2016. https://www.britannica.com/biography/al-Suyuti.
-
-Bastian M., Heymann S., Jacomy M. (2009). Gephi: an open source software for exploring and manipulating networks. International AAAI Conference on Weblogs and Social Media
-
-Delfina Serrano Ruano, “al-Qurṭubī”, in: Encyclopaedia of the Qurʾān, General Editor: Jane Dammen McAuliffe, Georgetown University, Washington DC. Retrieved From http://www.brillonline.com
-
-Jackson, Sherman A(1996). Islamic law and the state: the constitutional jurisprudence of Shihāb al-Dīn al-Qarāfī. Leiden: E.J. Brill, 1996.
-
-Jaffer, Tariq (2015). Razi: Master of Qur'anic Interpretation and Theological Reasoning. New York, NY: Oxford University Press.
-
-"Liste des compagnies aériennes par pays." (2011) Wikipedia. Accessed December 1, 2016. https://fr.wikipedia.org/wiki/Liste_des_compagnies_a%C3%A9riennes_par_pays.
-
-Meri, Josef W., ed. (2005). "Suyuti, Al-, 'Abd al-Rahman". Medieval Islamic Civilization: An Encyclopedia. Routledge. pp. 784–786.
-
-Poonawala, I., Wensinck, A.J. and Heffening, W., “al-Nasafī”, in: Encyclopaedia of Islam, Second Edition, Edited by: P. Bearman, Th. Bianquis, C.E. Bosworth, E. van Donzel, W.P. Heinrichs. Retrieved from http://www.brillonline.com
-
-Sharif , M M. "Al-MĀWARDĪ." Encyclopaedia of Islam, Second Edition1, no. 3 (August 8, 2002). Accessed December 1, 2016. doi:10.1163/1573-3912_islam_com_0713.
-
-Wheeler, Brannon M. Prophets in the Quran: an introduction to the Quran and Muslim exegesis. London: Continuum, 2002.
-pg 337
-
-Zahoor, A., Dr. "Al-Mawardi, 972-1058 C.E." Al-Mawardi, 972-1058 C.E. January 15, 1998. Accessed December 1, 2016. http://www.unhas.ac.id/rhiza/arsip/saintis/mawardi.html.
+\singlespacing
