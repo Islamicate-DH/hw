@@ -7,3 +7,4 @@ gem 'nokogiri'
 gem 'pandoc-ruby'
 gem 'pry'
 gem 'sanitize'
+gem "activesupport", ">= 5.2.4.3"
